@@ -1,0 +1,10 @@
+@use '../abstracts';
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: abstracts.$body-font-family;
+}
+.hidden {
+    display: none;
+}
