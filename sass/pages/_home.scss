@@ -1,0 +1,82 @@
+@use '../abstracts';
+
+.why-ostaya {
+   h2 {
+    text-align: center;
+    font-family: abstracts.$heading-font-family;
+    color: abstracts.$primary-color;
+    font-weight: abstracts.$font-regular;
+    margin-bottom: 90px;
+
+   }
+}
+.features {
+  padding:  20px;
+
+  h2 {
+    margin-bottom: 40px;
+  }
+}
+.features{
+    text-align:center;
+
+    p {
+        color: abstracts.$primary-color;
+    }
+
+}
+
+.icon{
+    border: 1px solid abstracts.$body-text-color;
+    padding: 100px;
+    margin-bottom: 30px;
+}
+.line-separator {
+
+    width:100%;
+    height:3px;
+    background: abstracts.$secondary-color;
+    margin: 70px 0px 40px 0px;
+
+}
+.products {
+    h2 {
+        color: abstracts.$primary-color;
+        font-family: abstracts.$heading-font-family;
+        font-weight: abstracts.$font-regular;
+        margin: 60px 60px;
+        text-align: center;
+
+    }
+}
+.product-card{
+    text-align: center;
+}
+
+.product-img{
+    width: 100px;
+    height: 90px;
+    border: 1px solid abstracts.$body-text-color;
+    margin-bottom: 20px;
+}
+
+.product-card button{
+    background: abstracts.$secondary-color;
+    border: none;
+    border-radius: 8px;
+    color: abstracts.$white;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    margin: 20px 0px 70px 0px;
+}
+
+.view-products{
+    background: abstracts.$secondary-color;
+    border: none;
+    border-radius: 8px;
+    color: abstracts.$white;
+    padding: 10px 18px;
+    font-size: 15px;
+    cursor: pointer;
+}
