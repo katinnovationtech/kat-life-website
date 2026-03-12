@@ -1,0 +1,91 @@
+@use '../abstracts';
+
+.contact-header {
+    margin-top: 100px;
+
+    h2 {
+        color: abstracts.$primary-color;
+        font-family: abstracts.$heading-font-family;
+        margin-bottom: 10px;
+
+        p {
+            font-size: 10px;
+        }
+    }
+}
+.contact-section {
+    background-color: abstracts.$secondary-color;
+    margin-bottom: 60px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 10px 25px rgba(0,0,0,0.1);
+
+ h3 {
+    text-align: center;
+}
+ input,
+  textarea {
+   width: 100%;
+   padding: 7px;
+   background-color: abstracts.$body-text-color;
+   border: none;
+   border: 10px;
+   border-radius: 5px;
+ }
+
+  button[type="submit"] {
+   width: 20%;
+   padding: 8px;
+   background-color: abstracts.$form-cta-color;
+   color: abstracts.$body-text-color;
+   border: none;
+   border-radius: 4px;
+   cursor: pointer;
+   font-size: 16px;
+   margin-top: 15px;
+   margin-bottom: 15px;
+   transition: all 0.3s ease-in-out;
+
+   &:hover {
+   background-color: abstracts.$body-text-color;
+   color: abstracts.$form-cta-color;
+ }
+ }
+}
+#contact-form label {
+    color: abstracts.$accent-color;
+    line-height: 2;
+}
+#feedback p {
+	color: abstracts.$body-text-color;
+    font-size: 16px;
+}
+
+ @media screen and (min-width:768px) {
+     .contact {
+        h2 {
+            font-size: 30px;
+        }
+        p {
+            font-size: 18px;
+        }
+    }
+    #contact {
+    text-align: center;
+}
+ }
+
+  @media screen and (min-width:1200px) {
+    .contact {
+        h2 {
+            font-size: 40px;
+        }
+        p {
+            font-size: 20px;
+        }
+    }
+    #contact {
+        text-align: center;
+        margin-top: 170px;
+} 
+ }
