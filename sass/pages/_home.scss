@@ -49,3 +49,34 @@
 
     }
 }
+.product-card{
+    text-align: center;
+}
+
+.product-img{
+    width: 100px;
+    height: 90px;
+    border: 1px solid abstracts.$body-text-color;
+    margin-bottom: 20px;
+}
+
+.product-card button{
+    background: abstracts.$secondary-color;
+    border: none;
+    border-radius: 8px;
+    color: abstracts.$white;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    margin: 20px 0px 70px 0px;
+}
+
+.view-products{
+    background: abstracts.$secondary-color;
+    border: none;
+    border-radius: 8px;
+    color: abstracts.$white;
+    padding: 10px 18px;
+    font-size: 15px;
+    cursor: pointer;
+}
