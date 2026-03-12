@@ -7,17 +7,12 @@
 }
 .contact-header {
     margin-top: 100px;
-   
 
     h2 {
         color: abstracts.$primary-color;
         font-family: abstracts.$heading-font-family;
         margin-bottom: 10px;
-
-        p {
-            font-size: 10px;
-        }
-    }
+    } 
 }
 .contact-section {
     background-color: abstracts.$accent-color;
@@ -26,15 +21,15 @@
 
  h3 {
     text-align: center;
-}
- input,
+    }
+    input,
   textarea {
    width: 100%;
    padding: 7px;
    background-color: abstracts.$white;
    border: 1px solid abstracts.$body-text-color;
    margin-bottom: 20px;
- }
+     }
 
   button[type="submit"] {
    width: 20%;
@@ -47,6 +42,8 @@
    margin-bottom: 15px;
    transition: all 0.3s ease-in-out;
    border-radius: 7px;
+   margin-left: auto; 
+   display: block;
 
    &:hover {
    background-color: abstracts.$secondary-color;
