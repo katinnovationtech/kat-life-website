@@ -1,7 +1,13 @@
 @use '../abstracts';
 
+.contact-hero {
+    margin-top: 100px;
+    background-color: abstracts.$body-text-color;
+    padding: 10px;
+}
 .contact-header {
     margin-top: 100px;
+   
 
     h2 {
         color: abstracts.$primary-color;
@@ -14,11 +20,9 @@
     }
 }
 .contact-section {
-    background-color: abstracts.$secondary-color;
-    margin-bottom: 60px;
+    background-color: abstracts.$accent-color;
+    margin: 50px 0px 60px 0px;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 10px 25px rgba(0,0,0,0.1);
 
  h3 {
     text-align: center;
@@ -27,65 +31,42 @@
   textarea {
    width: 100%;
    padding: 7px;
-   background-color: abstracts.$body-text-color;
-   border: none;
-   border: 10px;
-   border-radius: 5px;
+   background-color: abstracts.$white;
+   border: 1px solid abstracts.$body-text-color;
+   margin-bottom: 20px;
  }
 
   button[type="submit"] {
    width: 20%;
    padding: 8px;
-   background-color: abstracts.$form-cta-color;
-   color: abstracts.$body-text-color;
-   border: none;
-   border-radius: 4px;
+   background-color: abstracts.$accent-color;
+   border: 1px solid abstracts.$body-text-color;
    cursor: pointer;
    font-size: 16px;
    margin-top: 15px;
    margin-bottom: 15px;
    transition: all 0.3s ease-in-out;
+   border-radius: 7px;
 
    &:hover {
-   background-color: abstracts.$body-text-color;
-   color: abstracts.$form-cta-color;
+   background-color: abstracts.$secondary-color;
+   color: abstracts.$white;
  }
  }
 }
-#contact-form label {
-    color: abstracts.$accent-color;
-    line-height: 2;
-}
-#feedback p {
-	color: abstracts.$body-text-color;
-    font-size: 16px;
-}
-
- @media screen and (min-width:768px) {
-     .contact {
-        h2 {
-            font-size: 30px;
-        }
-        p {
-            font-size: 18px;
-        }
-    }
-    #contact {
+.gg-map {
+    background-color: abstracts.$body-text-color;
+    padding: 100px;
     text-align: center;
+    color: abstracts.$white;
+    margin-top: 100px;
 }
- }
-
-  @media screen and (min-width:1200px) {
-    .contact {
-        h2 {
-            font-size: 40px;
-        }
-        p {
-            font-size: 20px;
-        }
+.contact-info {
+    margin-top: 100px;
+    text-align: center;
+    a {
+        text-decoration: none;
+        color: abstracts.$secondary-color;
+        font-weight: abstracts.$font-bold;
     }
-    #contact {
-        text-align: center;
-        margin-top: 170px;
-} 
- }
+}
