@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useCart } from '../context/CartContext';
 import './ProductDetail.css';
 
 const COLOR_MAP = {
@@ -46,6 +47,7 @@ function getSessionId() {
 
 function ProductDetail() {
   const { id } = useParams();
+  const { updateCartCount } = useCart();
   const [product, setProduct]     = useState(null);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -108,6 +110,7 @@ function ProductDetail() {
       if (data.success) {
         setAddStatus('success');
         setAddMessage('Added to your bag!');
+        updateCartCount();
       } else {
         setAddStatus('error');
         setAddMessage(data.error || 'Could not add to bag.');

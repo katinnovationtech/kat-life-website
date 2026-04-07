@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useCart } from '../context/CartContext';
 import './Cart.css';
 
 function generateUUID() {
@@ -24,7 +25,10 @@ function Cart() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showPreorderModal, setShowPreorderModal] = useState(false);
   const sessionId = getCartSessionId();
+  const navigate = useNavigate();
+  const { updateCartCount } = useCart();
 
   const fetchCart = useCallback(() => {
     setLoading(true);
@@ -56,6 +60,7 @@ function Cart() {
         setItems((prev) =>
           prev.map((i) => (i.id === itemId ? { ...i, quantity: newQty } : i))
         );
+        updateCartCount();
       }
     } catch {}
   };
@@ -66,6 +71,7 @@ function Cart() {
       const data = await res.json();
       if (data.success) {
         setItems((prev) => prev.filter((i) => i.id !== itemId));
+        updateCartCount();
       }
     } catch {}
   };
@@ -265,14 +271,84 @@ function Cart() {
                   {subtotal > 0 ? `CAD$ ${subtotal.toFixed(2)}` : 'CAD$ —'}
                 </span>
               </div>
-              <button className="cart-checkout-btn">
-                PROCEED TO CHECKOUT
+              <button
+                className="cart-checkout-btn"
+                onClick={() => setShowPreorderModal(true)}
+              >
+                PRE-ORDER NOW
               </button>
             </div>
           </div>
         )}
       </div>
       <Footer />
+
+      {/* Pre-Order Modal */}
+      {showPreorderModal && (
+        <div className="preorder-modal-overlay" onClick={() => setShowPreorderModal(false)}>
+          <div className="preorder-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="preorder-modal__close"
+              onClick={() => setShowPreorderModal(false)}
+              aria-label="Close"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            <h2 className="preorder-modal__title">How would you like to pre-order?</h2>
+            <div className="preorder-modal__cards">
+              {/* Guest Card */}
+              <div className="preorder-card">
+                <div className="preorder-card__icon">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <h3 className="preorder-card__title">Pre-Order as Guest</h3>
+                <p className="preorder-card__desc">Quick and easy. No account needed.</p>
+                <button
+                  className="preorder-card__btn"
+                  onClick={() => {
+                    setShowPreorderModal(false);
+                    const first = items[0];
+                    const cartState = first ? {
+                      productInterest: first.name.toLowerCase().includes('skort')
+                        ? 'OSTAYA™ Wellness Skorts'
+                        : first.name.toLowerCase().includes('short')
+                          ? 'OSTAYA™ Wellness Shorts'
+                          : '',
+                      color: first.color,
+                      size: first.size,
+                    } : {};
+                    navigate('/preorder-guest', { state: cartState });
+                  }}
+                >
+                  Continue as Guest
+                </button>
+              </div>
+
+              {/* Sign Up Card */}
+              <div className="preorder-card preorder-card--featured">
+                <div className="preorder-card__badge">Save 25%</div>
+                <div className="preorder-card__icon">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </div>
+                <h3 className="preorder-card__title">Sign Up &amp; Pre-Order</h3>
+                <p className="preorder-card__desc">Create an account and get 25% off when products launch.</p>
+                <button
+                  className="preorder-card__btn preorder-card__btn--primary"
+                  onClick={() => { setShowPreorderModal(false); navigate('/signup'); }}
+                >
+                  Sign Up &amp; Save 25%
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

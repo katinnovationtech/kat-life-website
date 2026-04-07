@@ -1,12 +1,22 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
 import Shop from './pages/Shop';
 import ProductDetail from './pages/ProductDetail';
 import Contact from './pages/Contact';
 import Cart from './pages/Cart';
+import PreorderGuest from './pages/PreorderGuest';
+import Signup from './pages/Signup';
+import Login from './pages/Login';
+import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import VerifyCode from './pages/VerifyCode';
+import ChangePassword from './pages/ChangePassword';
+import EmailVerified from './pages/EmailVerified';
 
 function App() {
   return (
+    <CartProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/shop" replace />} />
@@ -14,8 +24,17 @@ function App() {
         <Route path="/shop/:id" element={<ProductDetail />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/preorder-guest" element={<PreorderGuest />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-code" element={<VerifyCode />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/email-verified" element={<EmailVerified />} />
       </Routes>
     </Router>
+    </CartProvider>
   );
 }
 

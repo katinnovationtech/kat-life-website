@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { CartContext } from '../context/CartContext';
 import './Shop.css';
 
 const COLOR_MAP = {
@@ -23,68 +24,121 @@ const SORT_OPTIONS = [
 ];
 
 function ProductCard({ product }) {
-  const [quickAddSize, setQuickAddSize] = useState(null);
-  const [addedMsg, setAddedMsg] = useState('');
+  const { updateCartCount } = useContext(CartContext);
 
-  const handleQuickAdd = async (size) => {
-    setQuickAddSize(size);
+  // Derive the colors available for this product from its color field
+  const productColors = product.colors
+    ? product.colors.filter((c) => COLOR_MAP[c])
+    : Object.keys(COLOR_MAP).filter((c) => c === product.color || !product.color);
+  const defaultColor = productColors[0] || Object.keys(COLOR_MAP)[0];
+
+  const [selectedColor, setSelectedColor] = useState(defaultColor);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [addedMsg, setAddedMsg] = useState('');
+  const [overlayOpen, setOverlayOpen] = useState(false);
+
+  const handleQuickAdd = async (e) => {
+    e.preventDefault();
+    if (!selectedSize || adding) return;
+    setAdding(true);
     const sessionId = getSessionId();
     try {
       const res = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sessionId, product_id: product.id, size, color: product.color, quantity: 1 }),
+        body: JSON.stringify({
+          session_id: sessionId,
+          product_id: product.id,
+          size: selectedSize,
+          color: selectedColor,
+          quantity: 1,
+        }),
       });
       const data = await res.json();
       if (data.success) {
-        setAddedMsg(`Added ${size}!`);
-        setTimeout(() => { setAddedMsg(''); setQuickAddSize(null); }, 1500);
+        updateCartCount();
+        setAddedMsg('Added to bag!');
+        setTimeout(() => {
+          setAddedMsg('');
+          setSelectedSize(null);
+          setOverlayOpen(false);
+        }, 2000);
       }
     } catch {
-      setAddedMsg('Error');
-      setTimeout(() => { setAddedMsg(''); setQuickAddSize(null); }, 1500);
+      setAddedMsg('Error adding item');
+      setTimeout(() => setAddedMsg(''), 2000);
+    } finally {
+      setAdding(false);
     }
   };
 
-  const productColors = Object.entries(COLOR_MAP).slice(0, 4);
-
   return (
     <div className="product-card">
-      <Link to={`/shop/${product.id}`} className="product-card__img-wrap">
-        <img
-          src={product.image_url}
-          alt={`${product.name} in ${product.color}`}
-          className="product-card__img"
-          loading="lazy"
-        />
-        <div className="product-card__overlay">
+      <div
+        className="product-card__img-wrap"
+        onTouchStart={() => setOverlayOpen((o) => !o)}
+      >
+        <Link to={`/shop/${product.id}`}>
+          <img
+            src={product.image_url}
+            alt={`${product.name} in ${product.color}`}
+            className="product-card__img"
+            loading="lazy"
+          />
+        </Link>
+        <div className={`product-card__overlay${overlayOpen ? ' overlay--open' : ''}`}>
           {addedMsg ? (
             <div className="product-card__added-msg">{addedMsg}</div>
           ) : (
             <div className="product-card__quick-add">
               <p className="product-card__quick-add-label">QUICK ADD</p>
+
+              <p className="product-card__selector-label">COLOR</p>
+              <div className="product-card__color-swatches">
+                {productColors.map((name) => (
+                  <button
+                    key={name}
+                    className={`product-card__color-swatch${selectedColor === name ? ' selected' : ''}`}
+                    style={{ background: COLOR_MAP[name] }}
+                    title={name}
+                    onClick={(e) => { e.preventDefault(); setSelectedColor(name); }}
+                    aria-label={name}
+                  />
+                ))}
+              </div>
+
+              <p className="product-card__selector-label">SIZE</p>
               <div className="product-card__sizes">
                 {SIZES.map((s) => (
                   <button
                     key={s}
-                    className={`product-card__size-btn${quickAddSize === s ? ' active' : ''}`}
-                    onClick={(e) => { e.preventDefault(); handleQuickAdd(s); }}
+                    className={`product-card__size-btn${selectedSize === s ? ' active' : ''}`}
+                    onClick={(e) => { e.preventDefault(); setSelectedSize(s); }}
                   >
                     {s}
                   </button>
                 ))}
               </div>
+
+              <button
+                className={`product-card__add-btn${!selectedSize ? ' disabled' : ''}`}
+                onClick={handleQuickAdd}
+                disabled={!selectedSize || adding}
+              >
+                {adding ? 'Adding…' : 'ADD TO BAG'}
+              </button>
             </div>
           )}
         </div>
-      </Link>
+      </div>
       <div className="product-card__info">
         <div className="product-card__swatches">
-          {productColors.map(([name, hex]) => (
+          {productColors.map((name) => (
             <span
               key={name}
               className="product-card__swatch"
-              style={{ background: hex }}
+              style={{ background: COLOR_MAP[name] }}
               title={name}
             />
           ))}

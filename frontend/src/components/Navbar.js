@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import './Navbar.css';
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const { cartCount, updateCartCount } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -22,18 +23,8 @@ function Navbar() {
 
   // Refresh cart count whenever the page changes
   useEffect(() => {
-    const sessionId = localStorage.getItem('cartSessionId');
-    if (!sessionId) return;
-    fetch(`/api/cart/${sessionId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) {
-          const total = data.data.reduce((sum, item) => sum + item.quantity, 0);
-          setCartCount(total);
-        }
-      })
-      .catch(() => {});
-  }, [location]);
+    updateCartCount();
+  }, [location, updateCartCount]);
 
   const toggleMenu = () => {
     setMenuOpen((prev) => {
@@ -60,7 +51,7 @@ function Navbar() {
             <li><Link to="/about" className={isActive('/about') ? 'active' : ''}>About</Link></li>
             <li><Link to="/shop" className={isActive('/shop') ? 'active' : ''}>Shop</Link></li>
             <li><Link to="/contact" className={isActive('/contact') ? 'active' : ''}>Contact</Link></li>
-            <li><Link to="/signin" className={isActive('/signin') ? 'active' : ''}>Sign In</Link></li>
+            <li><Link to="/login" className={isActive('/login') ? 'active' : ''}>Sign In</Link></li>
           </ul>
 
           {/* Right icons */}
@@ -111,7 +102,7 @@ function Navbar() {
           <Link to="/cart" className="mobile-menu__link">
             Bag{cartCount > 0 ? ` (${cartCount})` : ''}
           </Link>
-          <Link to="/signin" className="mobile-menu__link">Sign In</Link>
+          <Link to="/login" className="mobile-menu__link">Sign In</Link>
         </nav>
       </div>
     </>

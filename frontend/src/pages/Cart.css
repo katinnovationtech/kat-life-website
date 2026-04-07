@@ -385,6 +385,155 @@
   }
 }
 
+/* ---- Pre-Order Modal ---- */
+
+.preorder-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.preorder-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 44px 40px 40px;
+  width: 100%;
+  max-width: 580px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.preorder-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: #6b6b6b;
+  padding: 6px;
+  line-height: 0;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.preorder-modal__close:hover {
+  color: #1a1a1a;
+  background: #f0f0f0;
+}
+
+.preorder-modal__title {
+  font-family: var(--font-heading);
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.preorder-modal__cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.preorder-card {
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.preorder-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.preorder-card--featured {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.preorder-card__badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 4px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.preorder-card__icon {
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.preorder-card__title {
+  font-family: var(--font-heading);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.preorder-card__desc {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.preorder-card__btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 40px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: transparent;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.preorder-card__btn:hover {
+  background: var(--color-primary-light);
+}
+
+.preorder-card__btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.preorder-card__btn--primary:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+@media (max-width: 520px) {
+  .preorder-modal {
+    padding: 36px 24px 32px;
+  }
+
+  .preorder-modal__cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 480px) {
   .cart-container {
     padding: 32px 16px 64px;
