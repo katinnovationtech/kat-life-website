@@ -24,7 +24,7 @@
   letter-spacing: 0.01em;
 }
 
-/* ---- Two-column layout ---- */
+/*  Two-column layout*/
 .cart-layout {
   display: grid;
   grid-template-columns: 1fr 360px;
