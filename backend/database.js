@@ -122,11 +122,64 @@ const healthCols = [
   ['health_concerns', 'TEXT'],
   ['age_range', 'TEXT'],
   ['how_heard', 'TEXT'],
+  ['preorder_status', "TEXT DEFAULT 'Ordered'"],
 ];
 for (const [col, type] of healthCols) {
   if (!userCols.includes(col)) {
     db.exec(`ALTER TABLE users ADD COLUMN ${col} ${type}`);
   }
+}
+
+// Migrate: add status column to guest_preorders if it doesn't exist
+const guestCols = db.prepare('PRAGMA table_info(guest_preorders)').all().map((c) => c.name);
+if (!guestCols.includes('status')) {
+  db.exec(`ALTER TABLE guest_preorders ADD COLUMN status TEXT DEFAULT 'Ordered'`);
+}
+
+// Migrate: add read status to contact_messages if it doesn't exist
+const contactCols = db.prepare('PRAGMA table_info(contact_messages)').all().map((c) => c.name);
+if (!contactCols.includes('is_read')) {
+  db.exec(`ALTER TABLE contact_messages ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0`);
+}
+
+// Create admin tables
+db.exec(`
+  CREATE TABLE IF NOT EXISTS admin_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'admin',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS admin_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_id INTEGER NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (admin_id) REFERENCES admin_users(id)
+  );
+`);
+
+// Seed default admin account
+const bcrypt = require('bcrypt');
+const adminExists = db.prepare("SELECT COUNT(*) as cnt FROM admin_users WHERE username = 'admin'").get();
+if (adminExists.cnt === 0) {
+  const defaultPassword = 'Admin@KAT2026';
+  const hashed = bcrypt.hashSync(defaultPassword, 10);
+  db.prepare(
+    "INSERT INTO admin_users (username, email, password, role) VALUES (?, ?, ?, ?)"
+  ).run('admin', 'admin@katlife.com', hashed, 'superadmin');
+  console.log('\n========================================');
+  console.log('  DEFAULT ADMIN ACCOUNT CREATED');
+  console.log('  Username : admin');
+  console.log('  Password : Admin@KAT2026');
+  console.log('  Email    : admin@katlife.com');
+  console.log('  Role     : superadmin');
+  console.log('  Login at : http://localhost:3000/admin/login');
+  console.log('========================================\n');
 }
 
 module.exports = db;

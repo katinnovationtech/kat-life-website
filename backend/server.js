@@ -7,6 +7,7 @@ const subscribeRouter = require('./routes/subscribe');
 const contactRouter = require('./routes/contact');
 const preorderRouter = require('./routes/preorder');
 const authRouter = require('./routes/auth');
+const adminRouter = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.use('/api/subscribe', subscribeRouter);
 app.use('/api/contact', contactRouter);
 app.use('/api/preorder', preorderRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/admin', adminRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
