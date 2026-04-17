@@ -98,14 +98,18 @@ router.get('/stats', requireAdmin, (req, res) => {
 
 router.get('/preorders/guest', requireAdmin, (req, res) => {
   const rows = db.prepare(
-    'SELECT * FROM guest_preorders ORDER BY created_at DESC'
+    'SELECT id, full_name, email, phone, city, country, product_interest, color, size, status, created_at FROM guest_preorders ORDER BY created_at DESC'
   ).all();
   res.json({ success: true, preorders: rows });
 });
 
 router.get('/preorders/members', requireAdmin, (req, res) => {
   const rows = db.prepare(
-    'SELECT id, username, email, discount_code, preorder_status, activity_level, primary_health_goal, age_range, created_at FROM users ORDER BY created_at DESC'
+    `SELECT id, first_name, last_name, email, phone, city, country,
+     age_range, sex, height_feet, height_inches, weight, weight_unit,
+     activity_level, primary_health_goal, how_heard, health_concerns,
+     discount_code, consent_contacted, preorder_status, created_at
+     FROM users ORDER BY created_at DESC`
   ).all();
   res.json({ success: true, preorders: rows });
 });
@@ -113,7 +117,9 @@ router.get('/preorders/members', requireAdmin, (req, res) => {
 router.get('/preorders/all', requireAdmin, (req, res) => {
   const guests = db.prepare('SELECT *, "guest" as type FROM guest_preorders ORDER BY created_at DESC').all();
   const members = db.prepare(
-    'SELECT id, username as full_name, email, discount_code, preorder_status as status, created_at, "member" as type FROM users ORDER BY created_at DESC'
+    `SELECT id, COALESCE(first_name || ' ' || last_name, username) as full_name,
+     email, discount_code, preorder_status as status, created_at, "member" as type
+     FROM users ORDER BY created_at DESC`
   ).all();
   const combined = [...guests, ...members].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   res.json({ success: true, preorders: combined });
@@ -140,20 +146,31 @@ router.put('/preorders/member/:id', requireAdmin, (req, res) => {
 });
 
 router.get('/preorders/export', requireAdmin, (req, res) => {
-  const guests = db.prepare('SELECT * FROM guest_preorders ORDER BY created_at DESC').all();
-  const members = db.prepare(
-    'SELECT id, username, email, discount_code, preorder_status, created_at FROM users ORDER BY created_at DESC'
-  ).all();
+  const { type } = req.query;
 
-  const headers = 'Type,ID,Name,Email,Phone,Product,Color,Size,Status,Date\n';
-  const guestRows = guests.map(r =>
-    `Guest,${r.id},"${r.full_name}","${r.email}","${r.phone || ''}","${r.product_interest}","${r.color}","${r.size}","${r.status}","${r.created_at}"`
-  ).join('\n');
-  const memberRows = members.map(r =>
-    `Member,${r.id},"${r.username}","${r.email}","${r.discount_code || ''}","","","","${r.preorder_status}","${r.created_at}"`
-  ).join('\n');
+  const headers = 'Type,ID,Name,Email,Phone,City,Country,Product,Color,Size,Status,Date\n';
+  let csv = headers;
 
-  const csv = headers + guestRows + '\n' + memberRows;
+  if (!type || type === 'guest') {
+    const guests = db.prepare('SELECT id, full_name, email, phone, city, country, product_interest, color, size, status, created_at FROM guest_preorders ORDER BY created_at DESC').all();
+    const guestRows = guests.map(r =>
+      `Guest,${r.id},"${r.full_name || ''}","${r.email || ''}","${r.phone || ''}","${r.city || ''}","${r.country || ''}","${r.product_interest || ''}","${r.color || ''}","${r.size || ''}","${r.status || ''}","${r.created_at || ''}"`
+    ).join('\n');
+    csv += guestRows;
+  }
+
+  if (!type || type === 'member') {
+    const members = db.prepare(
+      `SELECT id, COALESCE(first_name || ' ' || last_name, username) as display_name,
+       email, discount_code, preorder_status, created_at FROM users ORDER BY created_at DESC`
+    ).all();
+    const memberRows = members.map(r =>
+      `Member,${r.id},"${r.display_name || ''}","${r.email || ''}","","","","${r.discount_code || ''}","","","${r.preorder_status || ''}","${r.created_at || ''}"`
+    ).join('\n');
+    if (!type || type === 'guest') csv += '\n';
+    csv += memberRows;
+  }
+
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="preorders.csv"');
   res.send(csv);
@@ -206,7 +223,11 @@ router.put('/products/:id/availability', requireAdmin, (req, res) => {
 
 router.get('/users', requireAdmin, (req, res) => {
   const rows = db.prepare(
-    'SELECT id, username, email, discount_code, preorder_status, activity_level, primary_health_goal, age_range, created_at FROM users ORDER BY created_at DESC'
+    `SELECT id, username, first_name, last_name, email, phone, city, country,
+     age_range, sex, height_feet, height_inches, weight, weight_unit,
+     primary_health_goal, activity_level, health_concerns, how_heard,
+     discount_code, preorder_status, created_at
+     FROM users ORDER BY created_at DESC`
   ).all();
   res.json({ success: true, users: rows });
 });

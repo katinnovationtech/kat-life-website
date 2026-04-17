@@ -4,7 +4,7 @@ import './Auth.css';
 
 function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,11 @@ function Login() {
 
   const validate = () => {
     const e = {};
-    if (!form.username.trim()) e.username = 'Username is required.';
+    if (!form.email.trim()) {
+      e.email = 'Email address is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      e.email = 'Please enter a valid email address.';
+    }
     if (!form.password) e.password = 'Password is required.';
     return e;
   };
@@ -84,18 +88,18 @@ function Login() {
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-field">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="email">Email Address</label>
               <input
-                id="username"
-                name="username"
-                type="text"
-                className={`auth-input${errors.username ? ' auth-input--error' : ''}`}
-                placeholder="Enter your username"
-                value={form.username}
+                id="email"
+                name="email"
+                type="email"
+                className={`auth-input${errors.email ? ' auth-input--error' : ''}`}
+                placeholder="Enter your email address"
+                value={form.email}
                 onChange={handleChange}
-                autoComplete="username"
+                autoComplete="email"
               />
-              {errors.username && <p className="auth-field-error">{errors.username}</p>}
+              {errors.email && <p className="auth-field-error">{errors.email}</p>}
             </div>
 
             <div className="auth-field">

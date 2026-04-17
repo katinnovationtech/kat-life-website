@@ -661,6 +661,151 @@
   text-decoration: underline;
 }
 
+/* ---------- 2-step signup — step indicator ---------- */
+
+.auth-step-indicator {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.auth-step-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a5f7a;
+  margin-bottom: 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.auth-progress {
+  width: 100%;
+  height: 5px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.auth-progress__bar {
+  height: 100%;
+  background: #1a5f7a;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* ---------- 2-step signup — section headings ---------- */
+
+.auth-section-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1a5f7a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 24px 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e0f0f4;
+}
+
+/* ---------- 2-step signup — two-column row ---------- */
+
+.auth-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+@media (max-width: 480px) {
+  .auth-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- 2-step signup — height fields ---------- */
+
+.auth-height-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+  margin-top: 6px;
+}
+
+.auth-height-col {
+  flex: 1;
+}
+
+/* ---------- 2-step signup — weight with unit toggle ---------- */
+
+.auth-weight-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.auth-weight-wrap .auth-input {
+  flex: 1;
+}
+
+.auth-unit-toggle {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1.5px solid #1a5f7a;
+  border-radius: 20px;
+  background: transparent;
+  color: #1a5f7a;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 1px;
+}
+
+.auth-unit-toggle:hover {
+  background: #1a5f7a;
+  color: #fff;
+}
+
+/* ---------- 2-step signup — early access banner ---------- */
+
+.auth-early-banner {
+  background: #1a5f7a;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  width: 100%;
+  line-height: 1.5;
+}
+
+/* ---------- 2-step signup — bottom action row ---------- */
+
+.auth-step2-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.auth-back-link {
+  background: none;
+  border: none;
+  color: #1a5f7a;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-back-link:hover {
+  color: #134a60;
+  text-decoration: underline;
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 860px) {

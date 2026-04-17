@@ -157,6 +157,40 @@ function AdminInventory() {
     setDeleteId(null);
   };
 
+  const skorts = products.filter((p) => p.type === 'skort');
+  const shorts  = products.filter((p) => p.type === 'short');
+  const groups  = [
+    { label: 'Wellness Skorts', items: skorts },
+    { label: 'Wellness Shorts', items: shorts },
+  ];
+
+  const renderRows = (items) =>
+    items.map((p) => (
+      <tr key={p.id}>
+        <td style={{ fontWeight: 500 }}>{p.name}</td>
+        <td style={{ textTransform: 'capitalize' }}>{p.type}</td>
+        <td>{p.color}</td>
+        <td>{p.price > 0 ? `CAD$${Number(p.price).toFixed(2)}` : 'TBD'}</td>
+        <td>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <label className="admin-toggle">
+              <input type="checkbox" checked={p.is_available !== 0} onChange={() => handleToggle(p)} />
+              <span className="admin-toggle-slider" />
+            </label>
+            <span className={`admin-badge ${p.is_available !== 0 ? 'admin-badge-available' : 'admin-badge-soldout'}`}>
+              {p.is_available !== 0 ? 'Available' : 'Sold Out'}
+            </span>
+          </div>
+        </td>
+        <td>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="admin-btn admin-btn-outline admin-btn-sm" onClick={() => setModalProduct(p)}>Edit</button>
+            <button className="admin-btn admin-btn-danger admin-btn-sm" onClick={() => setDeleteId(p.id)}>Delete</button>
+          </div>
+        </td>
+      </tr>
+    ));
+
   return (
     <AdminLayout title="Inventory">
       <div className="admin-section">
@@ -166,52 +200,51 @@ function AdminInventory() {
         </div>
         {loading ? (
           <div className="admin-loading">Loading products…</div>
-        ) : (
+        ) : products.length === 0 ? (
           <div className="admin-table-wrap">
             <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Color</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Name</th><th>Type</th><th>Color</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
-                {products.length === 0 ? (
-                  <tr><td colSpan={6}>
-                    <div className="admin-empty"><div className="admin-empty-icon">📦</div><p>No products found.</p></div>
-                  </td></tr>
-                ) : products.map((p) => (
-                  <tr key={p.id}>
-                    <td style={{ fontWeight: 500 }}>{p.name}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{p.type}</td>
-                    <td>{p.color}</td>
-                    <td>{p.price > 0 ? `CAD$${Number(p.price).toFixed(2)}` : 'TBD'}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <label className="admin-toggle">
-                          <input type="checkbox" checked={p.is_available !== 0} onChange={() => handleToggle(p)} />
-                          <span className="admin-toggle-slider" />
-                        </label>
-                        <span className={`admin-badge ${p.is_available !== 0 ? 'admin-badge-available' : 'admin-badge-soldout'}`}>
-                          {p.is_available !== 0 ? 'Available' : 'Sold Out'}
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="admin-btn admin-btn-outline admin-btn-sm" onClick={() => setModalProduct(p)}>Edit</button>
-                        <button className="admin-btn admin-btn-danger admin-btn-sm" onClick={() => setDeleteId(p.id)}>Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                <tr><td colSpan={6}><div className="admin-empty"><div className="admin-empty-icon">📦</div><p>No products found.</p></div></td></tr>
               </tbody>
             </table>
           </div>
+        ) : (
+          groups.map(({ label, items }) =>
+            items.length === 0 ? null : (
+              <div key={label} style={{ marginBottom: '32px' }}>
+                <h3 style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: '#1a5f7a',
+                  borderBottom: '2px solid #e0f0f4',
+                  paddingBottom: '8px',
+                  marginBottom: '0',
+                }}>
+                  {label} ({items.length})
+                </h3>
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Color</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {renderRows(items)}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )
+          )
         )}
       </div>
 

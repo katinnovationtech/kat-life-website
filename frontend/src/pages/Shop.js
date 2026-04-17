@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { CartContext } from '../context/CartContext';
 import './Shop.css';
 
+// Exact spec colors
 const COLOR_MAP = {
-  'White':      '#f5f5f5',
-  'Black':      '#1a1a1a',
-  'Grey':       '#9e9e9e',
-  'Royal Blue': '#4169e1',
-  'Navy Blue':  '#001f5b',
+  'White':      '#FFFFFF',
+  'Black':      '#000000',
+  'Grey':       '#808080',
+  'Royal Blue': '#4169E1',
+  'Navy Blue':  '#001F5B',
 };
 
-const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const SORT_OPTIONS = [
   { value: 'default',    label: 'Featured' },
@@ -23,35 +24,68 @@ const SORT_OPTIONS = [
   { value: 'price-desc',label: 'Price: High–Low' },
 ];
 
+function getSessionId() {
+  let id = localStorage.getItem('cartSessionId');
+  if (!id) {
+    id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+    localStorage.setItem('cartSessionId', id);
+  }
+  return id;
+}
+
+// ─── Product Card ─────────────────────────────────────────────────────────────
+
 function ProductCard({ product }) {
   const { updateCartCount } = useContext(CartContext);
+  const navigate = useNavigate();
 
-  // Derive the colors available for this product from its color field
-  const productColors = product.colors
-    ? product.colors.filter((c) => COLOR_MAP[c])
-    : Object.keys(COLOR_MAP).filter((c) => c === product.color || !product.color);
-  const defaultColor = productColors[0] || Object.keys(COLOR_MAP)[0];
-
-  const [selectedColor, setSelectedColor] = useState(defaultColor);
+  const variants = product.variants || [];
+  const [variantIdx, setVariantIdx] = useState(0);
+  const [imgKey, setImgKey] = useState(0);          // incremented to trigger fade
   const [selectedSize, setSelectedSize] = useState(null);
   const [adding, setAdding] = useState(false);
   const [addedMsg, setAddedMsg] = useState('');
   const [overlayOpen, setOverlayOpen] = useState(false);
 
+  const currentVariant = variants[variantIdx] || variants[0];
+
+  const changeVariant = (newIdx) => {
+    setVariantIdx(newIdx);
+    setImgKey((k) => k + 1);
+  };
+
+  const prevColor = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    changeVariant((variantIdx - 1 + variants.length) % variants.length);
+  };
+
+  const nextColor = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    changeVariant((variantIdx + 1) % variants.length);
+  };
+
+  const handleSwatchClick = (idx) => {
+    if (idx !== variantIdx) changeVariant(idx);
+  };
+
   const handleQuickAdd = async (e) => {
     e.preventDefault();
-    if (!selectedSize || adding) return;
+    if (!selectedSize || adding || !currentVariant) return;
     setAdding(true);
-    const sessionId = getSessionId();
     try {
       const res = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          session_id: sessionId,
-          product_id: product.id,
+          session_id: getSessionId(),
+          product_id: currentVariant.id,
           size: selectedSize,
-          color: selectedColor,
+          color: currentVariant.color,
           quantity: 1,
         }),
       });
@@ -73,20 +107,60 @@ function ProductCard({ product }) {
     }
   };
 
+  const handleCardClick = () => {
+    navigate(`/shop/${currentVariant.id}`, {
+      state: { selectedColor: currentVariant.color },
+    });
+  };
+
+  if (!currentVariant) return null;
+
   return (
     <div className="product-card">
+      {/* ── Image area ── */}
       <div
         className="product-card__img-wrap"
         onTouchStart={() => setOverlayOpen((o) => !o)}
       >
-        <Link to={`/shop/${product.id}`}>
+        {/* Main image — click navigates to PDP */}
+        <div
+          className="product-card__img-link"
+          onClick={handleCardClick}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
+          aria-label={`View ${product.name} in ${currentVariant.color}`}
+        >
           <img
-            src={product.image_url}
-            alt={`${product.name} in ${product.color}`}
-            className="product-card__img"
+            key={imgKey}
+            src={currentVariant.image_url}
+            alt={`${product.name} in ${currentVariant.color}`}
+            className="product-card__img product-card__img--fade"
             loading="lazy"
           />
-        </Link>
+        </div>
+
+        {/* Left / Right arrows (desktop hover) */}
+        {variants.length > 1 && (
+          <>
+            <button
+              className="product-card__arrow product-card__arrow--left"
+              onClick={prevColor}
+              aria-label="Previous color"
+            >
+              ‹
+            </button>
+            <button
+              className="product-card__arrow product-card__arrow--right"
+              onClick={nextColor}
+              aria-label="Next color"
+            >
+              ›
+            </button>
+          </>
+        )}
+
+        {/* Quick Add overlay */}
         <div className={`product-card__overlay${overlayOpen ? ' overlay--open' : ''}`}>
           {addedMsg ? (
             <div className="product-card__added-msg">{addedMsg}</div>
@@ -96,14 +170,17 @@ function ProductCard({ product }) {
 
               <p className="product-card__selector-label">COLOR</p>
               <div className="product-card__color-swatches">
-                {productColors.map((name) => (
+                {variants.map((v, i) => (
                   <button
-                    key={name}
-                    className={`product-card__color-swatch${selectedColor === name ? ' selected' : ''}`}
-                    style={{ background: COLOR_MAP[name] }}
-                    title={name}
-                    onClick={(e) => { e.preventDefault(); setSelectedColor(name); }}
-                    aria-label={name}
+                    key={v.id}
+                    className={`product-card__color-swatch${i === variantIdx ? ' selected' : ''}`}
+                    style={{
+                      background: COLOR_MAP[v.color] || v.color,
+                      ...(v.color === 'White' ? { boxShadow: '0 0 0 1px rgba(255,255,255,0.5), inset 0 0 0 1px rgba(0,0,0,0.15)' } : {}),
+                    }}
+                    title={v.color}
+                    onClick={(e) => { e.preventDefault(); changeVariant(i); }}
+                    aria-label={v.color}
                   />
                 ))}
               </div>
@@ -132,40 +209,52 @@ function ProductCard({ product }) {
           )}
         </div>
       </div>
+
+      {/* ── Info area ── */}
       <div className="product-card__info">
+        {/* Color swatches — always visible, interactive */}
         <div className="product-card__swatches">
-          {productColors.map((name) => (
-            <span
-              key={name}
-              className="product-card__swatch"
-              style={{ background: COLOR_MAP[name] }}
-              title={name}
+          {variants.map((v, i) => (
+            <button
+              key={v.id}
+              className={`product-card__swatch-btn${i === variantIdx ? ' active' : ''}`}
+              style={{
+                background: COLOR_MAP[v.color] || v.color,
+                ...(v.color === 'White' ? { outline: '1.5px solid #ccc' } : {}),
+              }}
+              title={v.color}
+              onClick={() => handleSwatchClick(i)}
+              aria-label={v.color}
             />
           ))}
         </div>
-        <Link to={`/shop/${product.id}`}>
+
+        {/* Hover hint — desktop only */}
+        <p className="product-card__color-hint">← Hover to explore colors →</p>
+
+        {/* Name / color label / price — clicking goes to PDP */}
+        <div
+          className="product-card__text-link"
+          onClick={handleCardClick}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
+          style={{ cursor: 'pointer' }}
+        >
           <h3 className="product-card__name">{product.name}</h3>
-          <p className="product-card__color">{product.color}</p>
+          <p className="product-card__color">{currentVariant.color}</p>
           <p className="product-card__price">
-            {product.price > 0 ? `CAD$ ${product.price.toFixed(2)}` : 'CAD$ —'}
+            {currentVariant.price > 0
+              ? `CAD$ ${currentVariant.price.toFixed(2)}`
+              : 'CAD$ —'}
           </p>
-        </Link>
+        </div>
       </div>
     </div>
   );
 }
 
-function getSessionId() {
-  let id = localStorage.getItem('cartSessionId');
-  if (!id) {
-    id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-    });
-    localStorage.setItem('cartSessionId', id);
-  }
-  return id;
-}
+// ─── Shop Page ────────────────────────────────────────────────────────────────
 
 function Shop() {
   const [products, setProducts] = useState([]);
@@ -173,7 +262,7 @@ function Shop() {
   const [error, setError] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterType, setFilterType] = useState('all'); // 'all' | 'skort' | 'short'
+  const [filterType, setFilterType] = useState('all');
 
   useEffect(() => {
     fetch('/api/products')
@@ -186,15 +275,19 @@ function Shop() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = products.filter((p) => filterType === 'all' || p.type === filterType);
+  const filtered = products.filter(
+    (p) => filterType === 'all' || p.type === filterType
+  );
 
   const sorted = [...filtered].sort((a, b) => {
+    const priceA = a.variants?.[0]?.price ?? a.price ?? 0;
+    const priceB = b.variants?.[0]?.price ?? b.price ?? 0;
     switch (sortBy) {
-      case 'name-asc':  return a.name.localeCompare(b.name);
-      case 'name-desc': return b.name.localeCompare(a.name);
-      case 'price-asc': return a.price - b.price;
-      case 'price-desc':return b.price - a.price;
-      default: return a.id - b.id;
+      case 'name-asc':   return a.name.localeCompare(b.name);
+      case 'name-desc':  return b.name.localeCompare(a.name);
+      case 'price-asc':  return priceA - priceB;
+      case 'price-desc': return priceB - priceA;
+      default:           return 0;
     }
   });
 
@@ -269,9 +362,17 @@ function Shop() {
       {/* Products grid */}
       <main className="shop-products">
         <div className="shop-products__inner">
+
+          {/* Desktop hint — hidden on mobile */}
+          {!loading && !error && sorted.length > 0 && (
+            <p className="shop-desktop-hint">
+              💡 Hover over a product to explore available colors
+            </p>
+          )}
+
           {loading && (
             <div className="shop-loading">
-              {[...Array(8)].map((_, i) => (
+              {[...Array(2)].map((_, i) => (
                 <div key={i} className="product-card-skeleton">
                   <div className="skeleton-img" />
                   <div className="skeleton-line" />
@@ -280,10 +381,14 @@ function Shop() {
               ))}
             </div>
           )}
+
           {!loading && error && <p className="shop-error">{error}</p>}
+
           {!loading && !error && (
             <div className="product-grid">
-              {sorted.map((p) => <ProductCard key={p.id} product={p} />)}
+              {sorted.map((p) => (
+                <ProductCard key={p.base_product} product={p} />
+              ))}
             </div>
           )}
         </div>

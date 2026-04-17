@@ -1,17 +1,49 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import './Auth.css';
 
 const PRODUCTS = ['OSTAYA™ Wellness Skorts', 'OSTAYA™ Wellness Shorts', 'Both'];
 const COLORS = ['White', 'Black', 'Grey', 'Royal Blue', 'Navy Blue'];
-const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const COUNTRIES = [
+  'Canada',
+  'United States',
+  'Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina',
+  'Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados',
+  'Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana',
+  'Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon',
+  'Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica',
+  'Croatia','Cuba','Cyprus','Czech Republic','Denmark','Djibouti','Dominica','Dominican Republic',
+  'Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia',
+  'Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada',
+  'Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India',
+  'Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan',
+  'Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya',
+  'Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali',
+  'Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco',
+  'Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands',
+  'New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman',
+  'Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines',
+  'Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia',
+  'Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia',
+  'Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands',
+  'Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname',
+  'Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo',
+  'Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine',
+  'United Arab Emirates','United Kingdom','Uruguay','Uzbekistan','Vanuatu','Vatican City',
+  'Venezuela','Vietnam','Yemen','Zambia','Zimbabwe',
+];
 
 function PreorderGuest() {
   const { state } = useLocation();
+  const { updateCartCount } = useCart();
   const [form, setForm] = useState({
     full_name: '',
     email: '',
     phone: '',
+    city: '',
+    country: 'Canada',
     product_interest: state?.productInterest || '',
     color: state?.color || '',
     size: state?.size || '',
@@ -30,6 +62,8 @@ function PreorderGuest() {
       e.email = 'Please enter a valid email address.';
     }
     if (!form.phone.trim()) e.phone = 'Phone number is required.';
+    if (!form.city.trim()) e.city = 'City is required.';
+    if (!form.country) e.country = 'Please select a country.';
     if (!form.product_interest) e.product_interest = 'Please select a product.';
     if (!form.color) e.color = 'Please select a color.';
     if (!form.size) e.size = 'Please select a size.';
@@ -52,13 +86,15 @@ function PreorderGuest() {
     }
     setLoading(true);
     try {
+      const session_id = localStorage.getItem('cartSessionId');
       const res = await fetch('/api/preorder/guest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, session_id }),
       });
       const data = await res.json();
       if (data.success) {
+        updateCartCount();
         setSuccess(true);
       } else {
         setGlobalError(data.error || 'Something went wrong. Please try again.');
@@ -147,6 +183,39 @@ function PreorderGuest() {
                     onChange={handleChange}
                   />
                   {errors.phone && <p className="auth-field-error">{errors.phone}</p>}
+                </div>
+
+                <div className="auth-field">
+                  <label htmlFor="city">City</label>
+                  <input
+                    id="city"
+                    name="city"
+                    type="text"
+                    className={`auth-input${errors.city ? ' auth-input--error' : ''}`}
+                    placeholder="Enter your city"
+                    value={form.city}
+                    onChange={handleChange}
+                  />
+                  {errors.city && <p className="auth-field-error">{errors.city}</p>}
+                </div>
+
+                <div className="auth-field">
+                  <label htmlFor="country">Country</label>
+                  <div className="auth-select-wrap">
+                    <select
+                      id="country"
+                      name="country"
+                      className={`auth-select${errors.country ? ' auth-input--error' : ''}`}
+                      value={form.country}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select a country</option>
+                      {COUNTRIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {errors.country && <p className="auth-field-error">{errors.country}</p>}
                 </div>
 
                 <div className="auth-field">

@@ -4,10 +4,10 @@ const db = require('../database');
 
 // POST /api/preorder-guest
 router.post('/guest', (req, res) => {
-  const { full_name, email, phone, product_interest, color, size } = req.body;
+  const { full_name, email, phone, city, country, product_interest, color, size, session_id } = req.body;
 
   // Validate required fields
-  if (!full_name || !email || !phone || !product_interest || !color || !size) {
+  if (!full_name || !email || !phone || !city || !country || !product_interest || !color || !size) {
     return res.status(400).json({ success: false, error: 'All fields are required.' });
   }
 
@@ -28,9 +28,12 @@ router.post('/guest', (req, res) => {
 
   try {
     const stmt = db.prepare(
-      'INSERT INTO guest_preorders (full_name, email, phone, product_interest, color, size) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO guest_preorders (full_name, email, phone, city, country, product_interest, color, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    stmt.run(full_name, email, phone, product_interest, color, size);
+    stmt.run(full_name, email, phone, city, country, product_interest, color, size);
+    if (session_id) {
+      db.prepare('DELETE FROM cart WHERE session_id = ?').run(session_id);
+    }
     console.log(`[PreOrder] Guest pre-order registered: ${email}`);
     res.json({ success: true, message: 'Pre-order registered successfully.' });
   } catch (err) {

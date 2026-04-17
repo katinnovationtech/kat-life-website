@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
@@ -13,7 +13,7 @@ const COLOR_MAP = {
   'Navy Blue':  '#001f5b',
 };
 
-const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const TABS = ['Details', 'Fit & Fabric', 'Shipping & Returns'];
 
@@ -48,6 +48,8 @@ function getSessionId() {
 function ProductDetail() {
   const { id } = useParams();
   const { updateCartCount } = useCart();
+  const location = useLocation();
+  const passedColor = location.state?.selectedColor || null;
   const [product, setProduct]     = useState(null);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -77,11 +79,22 @@ function ProductDetail() {
       .then(([prodData, allData]) => {
         if (prodData.success) {
           setProduct(prodData.data);
-          setSelectedColor(prodData.data.color);
+          setSelectedColor(passedColor || prodData.data.color);
         } else {
           setError('Product not found.');
         }
-        if (allData.success) setAllProducts(allData.data);
+        if (allData.success) {
+          // /api/products now returns grouped format; flatten variants into individual records
+          const flat = allData.data.flatMap((group) =>
+            group.variants.map((v) => ({
+              ...v,
+              name: group.name,
+              type: group.type,
+              description: group.description,
+            }))
+          );
+          setAllProducts(flat);
+        }
       })
       .catch(() => setError('Network error.'))
       .finally(() => setLoading(false));

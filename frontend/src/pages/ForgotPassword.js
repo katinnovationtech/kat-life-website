@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './Auth.css';
 
 function ForgotPassword() {
-  const [form, setForm] = useState({ username: '', email: '' });
+  const [form, setForm] = useState({ email: '' });
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,6 @@ function ForgotPassword() {
 
   const validate = () => {
     const e = {};
-    if (!form.username.trim()) e.username = 'Username is required.';
     if (!form.email.trim()) {
       e.email = 'Email is required.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
@@ -86,26 +85,12 @@ function ForgotPassword() {
             <>
               <h1 className="auth-title">Forgot Password?</h1>
               <p className="auth-subtitle">
-                Enter your username and email address and we'll send you a reset link.
+                Enter your email address and we'll send you a reset link.
               </p>
 
               {globalError && <div className="auth-error-banner">{globalError}</div>}
 
               <form className="auth-form" onSubmit={handleSubmit} noValidate>
-                <div className="auth-field">
-                  <label htmlFor="username">Username</label>
-                  <input
-                    id="username"
-                    name="username"
-                    type="text"
-                    className={`auth-input${errors.username ? ' auth-input--error' : ''}`}
-                    placeholder="Enter your username"
-                    value={form.username}
-                    onChange={handleChange}
-                  />
-                  {errors.username && <p className="auth-field-error">{errors.username}</p>}
-                </div>
-
                 <div className="auth-field">
                   <label htmlFor="email">Email Address</label>
                   <input
@@ -113,9 +98,10 @@ function ForgotPassword() {
                     name="email"
                     type="email"
                     className={`auth-input${errors.email ? ' auth-input--error' : ''}`}
-                    placeholder="Enter your email"
+                    placeholder="Enter your email address"
                     value={form.email}
                     onChange={handleChange}
+                    autoComplete="email"
                   />
                   {errors.email && <p className="auth-field-error">{errors.email}</p>}
                 </div>

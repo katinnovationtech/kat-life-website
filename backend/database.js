@@ -130,10 +130,37 @@ for (const [col, type] of healthCols) {
   }
 }
 
-// Migrate: add status column to guest_preorders if it doesn't exist
+// Migrate: add extended profile columns for 2-step signup
+const userColsV2 = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+const profileCols = [
+  ['first_name', 'TEXT'],
+  ['last_name', 'TEXT'],
+  ['phone', 'TEXT'],
+  ['city', 'TEXT'],
+  ['country', 'TEXT'],
+  ['consent_contacted', 'INTEGER DEFAULT 0'],
+  ['sex', 'TEXT'],
+  ['height_feet', 'INTEGER'],
+  ['height_inches', 'INTEGER'],
+  ['weight', 'REAL'],
+  ['weight_unit', "TEXT DEFAULT 'lbs'"],
+];
+for (const [col, type] of profileCols) {
+  if (!userColsV2.includes(col)) {
+    db.exec(`ALTER TABLE users ADD COLUMN ${col} ${type}`);
+  }
+}
+
+// Migrate: add columns to guest_preorders if they don't exist
 const guestCols = db.prepare('PRAGMA table_info(guest_preorders)').all().map((c) => c.name);
 if (!guestCols.includes('status')) {
   db.exec(`ALTER TABLE guest_preorders ADD COLUMN status TEXT DEFAULT 'Ordered'`);
+}
+if (!guestCols.includes('city')) {
+  db.exec(`ALTER TABLE guest_preorders ADD COLUMN city TEXT`);
+}
+if (!guestCols.includes('country')) {
+  db.exec(`ALTER TABLE guest_preorders ADD COLUMN country TEXT`);
 }
 
 // Migrate: add read status to contact_messages if it doesn't exist

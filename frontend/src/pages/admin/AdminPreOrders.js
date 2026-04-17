@@ -20,45 +20,143 @@ function StatusSelect({ value, onChange }) {
   );
 }
 
+// Format snake_case or underscore-separated values to Title Case readable text
+function fmt(val) {
+  if (!val && val !== 0) return '—';
+  return String(val)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Format age range like "25_34" → "25 - 34"
+function fmtAge(val) {
+  if (!val) return '—';
+  return String(val).replace(/_/g, ' - ');
+}
+
+// Format height from feet/inches fields
+function fmtHeight(feet, inches) {
+  if (!feet && feet !== 0) return '—';
+  const i = inches || 0;
+  return `${feet}ft ${i}in`;
+}
+
+// Format weight with unit
+function fmtWeight(weight, unit) {
+  if (!weight && weight !== 0) return '—';
+  return `${weight} ${unit || 'lbs'}`;
+}
+
+// Format comma-separated concern list
+function fmtConcerns(val) {
+  if (!val) return '—';
+  return val.split(',').map((s) => fmt(s.trim())).join(', ');
+}
+
+const STATUS_BADGE_CLASS = {
+  Ordered: 'admin-badge-ordered',
+  Processing: 'admin-badge-processing',
+  'In Delivery': 'admin-badge-delivery',
+  Delivered: 'admin-badge-delivered',
+};
+
+function DetailRow({ label, children }) {
+  return (
+    <div className="admin-detail-row">
+      <span className="admin-detail-label">{label}</span>
+      <span className="admin-detail-value">{children}</span>
+    </div>
+  );
+}
+
+function DetailSection({ title }) {
+  return (
+    <p style={{
+      fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em',
+      textTransform: 'uppercase', color: '#1a5f7a',
+      borderBottom: '1px solid #e0f0f4', paddingBottom: '4px',
+      marginTop: '16px', marginBottom: '8px',
+    }}>{title}</p>
+  );
+}
+
 function DetailModal({ order, type, onClose, onStatusChange }) {
   if (!order) return null;
+  const statusVal = type === 'guest' ? order.status : order.preorder_status;
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
-      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="admin-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
         <div className="admin-modal-header">
           <h3>Order Details — #{order.id}</h3>
           <button className="admin-modal-close" onClick={onClose}>✕</button>
         </div>
-        <div className="admin-modal-body">
+        <div className="admin-modal-body" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
           {type === 'guest' ? (
             <>
-              <div className="admin-detail-row"><span className="admin-detail-label">Full Name</span><span className="admin-detail-value">{order.full_name}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Email</span><span className="admin-detail-value">{order.email}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Phone</span><span className="admin-detail-value">{order.phone}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Product</span><span className="admin-detail-value">{order.product_interest}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Color</span><span className="admin-detail-value">{order.color}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Size</span><span className="admin-detail-value">{order.size}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Date</span><span className="admin-detail-value">{new Date(order.created_at).toLocaleString()}</span></div>
+              <DetailSection title="Contact Details" />
+              <DetailRow label="Full Name">{order.full_name}</DetailRow>
+              <DetailRow label="Email">{order.email}</DetailRow>
+              <DetailRow label="Phone">{order.phone || '—'}</DetailRow>
+              <DetailRow label="City">{order.city || '—'}</DetailRow>
+              <DetailRow label="Country">{order.country || '—'}</DetailRow>
+
+              <DetailSection title="Product Details" />
+              <DetailRow label="Product Interest">{order.product_interest}</DetailRow>
+              <DetailRow label="Color">{order.color}</DetailRow>
+              <DetailRow label="Size">{order.size}</DetailRow>
+
+              <DetailSection title="Order Info" />
+              <DetailRow label="Status">
+                <span className={`admin-badge ${STATUS_BADGE_CLASS[order.status] || ''}`}>
+                  {order.status || 'Ordered'}
+                </span>
+              </DetailRow>
+              <DetailRow label="Date Submitted">{new Date(order.created_at).toLocaleString()}</DetailRow>
             </>
           ) : (
             <>
-              <div className="admin-detail-row"><span className="admin-detail-label">Username</span><span className="admin-detail-value">{order.username}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Email</span><span className="admin-detail-value">{order.email}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Discount Code</span><span className="admin-detail-value"><span className="admin-badge admin-badge-teal">{order.discount_code}</span></span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Activity Level</span><span className="admin-detail-value">{order.activity_level || '—'}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Health Goal</span><span className="admin-detail-value">{order.primary_health_goal || '—'}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Age Range</span><span className="admin-detail-value">{order.age_range || '—'}</span></div>
-              <div className="admin-detail-row"><span className="admin-detail-label">Signup Date</span><span className="admin-detail-value">{new Date(order.created_at).toLocaleString()}</span></div>
+              <DetailSection title="Contact Details" />
+              <DetailRow label="First Name">{order.first_name || '—'}</DetailRow>
+              <DetailRow label="Last Name">{order.last_name || '—'}</DetailRow>
+              <DetailRow label="Email">{order.email}</DetailRow>
+              <DetailRow label="Phone">{order.phone || '—'}</DetailRow>
+              <DetailRow label="City">{order.city || '—'}</DetailRow>
+              <DetailRow label="Country">{order.country || '—'}</DetailRow>
+              <DetailRow label="Consent to be Contacted">{order.consent_contacted ? 'Yes' : 'No'}</DetailRow>
+
+              <DetailSection title="Basic Profile" />
+              <DetailRow label="Age Range">{fmtAge(order.age_range)}</DetailRow>
+              <DetailRow label="Sex">{fmt(order.sex)}</DetailRow>
+              <DetailRow label="Height">{fmtHeight(order.height_feet, order.height_inches)}</DetailRow>
+              <DetailRow label="Weight">{fmtWeight(order.weight, order.weight_unit)}</DetailRow>
+
+              <DetailSection title="Product & Wellness Info" />
+              <DetailRow label="Activity Level">{fmt(order.activity_level)}</DetailRow>
+              <DetailRow label="Primary Goal">{fmt(order.primary_health_goal)}</DetailRow>
+              <DetailRow label="Main Concerns">{fmtConcerns(order.health_concerns)}</DetailRow>
+              <DetailRow label="How They Heard">{fmt(order.how_heard)}</DetailRow>
+
+              <DetailSection title="Account Info" />
+              <DetailRow label="Discount Code">
+                {order.discount_code
+                  ? <span className="admin-badge admin-badge-teal">{order.discount_code}</span>
+                  : '—'}
+              </DetailRow>
+              <DetailRow label="Signup Date">{new Date(order.created_at).toLocaleString()}</DetailRow>
+              <DetailRow label="Pre-Order Status">
+                <span className={`admin-badge ${STATUS_BADGE_CLASS[statusVal] || ''}`}>
+                  {statusVal || 'Ordered'}
+                </span>
+              </DetailRow>
             </>
           )}
-          <div className="admin-detail-row" style={{ marginTop: '12px' }}>
-            <span className="admin-detail-label">Update Status</span>
-            <span className="admin-detail-value">
+          <div style={{ borderTop: '1px solid #e0f0f4', marginTop: '16px', paddingTop: '12px' }}>
+            <DetailRow label="Update Status">
               <StatusSelect
-                value={type === 'guest' ? order.status : order.preorder_status}
+                value={statusVal || 'Ordered'}
                 onChange={(s) => onStatusChange(order.id, s)}
               />
-            </span>
+            </DetailRow>
           </div>
         </div>
         <div className="admin-modal-footer">
@@ -100,17 +198,37 @@ function OrdersTab({ type }) {
     if (selected?.id === id) setSelected((o) => ({ ...o, [type === 'guest' ? 'status' : 'preorder_status']: status }));
   };
 
-  const exportCSV = () => {
-    const token = localStorage.getItem('adminToken');
-    window.open(`/api/admin/preorders/export?token=${token}`, '_blank');
+  const handleExport = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(
+        `http://localhost:5000/api/admin/preorders/export?type=${type}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `preorders-${type}-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Export failed. Please try again.');
+    }
   };
 
   const statusKey = type === 'guest' ? 'status' : 'preorder_status';
-  const nameKey = type === 'guest' ? 'full_name' : 'username';
 
   const filtered = orders.filter((o) => {
     const q = search.toLowerCase();
-    const matchSearch = !q || (o[nameKey] || '').toLowerCase().includes(q) || (o.email || '').toLowerCase().includes(q);
+    const name = type === 'guest'
+      ? (o.full_name || '')
+      : `${o.first_name || ''} ${o.last_name || ''}`.trim();
+    const matchSearch = !q || name.toLowerCase().includes(q) || (o.email || '').toLowerCase().includes(q);
     const matchStatus = !filterStatus || (o[statusKey] || 'Ordered') === filterStatus;
     return matchSearch && matchStatus;
   });
@@ -130,7 +248,7 @@ function OrdersTab({ type }) {
             {STATUSES.map((s) => <option key={s}>{s}</option>)}
           </select>
         </div>
-        <button className="admin-btn admin-btn-outline admin-btn-sm" onClick={exportCSV}>⤓ Export CSV</button>
+        <button className="admin-btn admin-btn-outline admin-btn-sm" onClick={handleExport}>⤓ Export CSV</button>
       </div>
 
       <div className="admin-table-wrap">
@@ -143,18 +261,19 @@ function OrdersTab({ type }) {
                   <th>Full Name</th>
                   <th>Email</th>
                   <th>Phone</th>
+                  <th>City</th>
+                  <th>Country</th>
                   <th>Product</th>
                   <th>Color</th>
                   <th>Size</th>
                 </>
               ) : (
                 <>
-                  <th>Username</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
                   <th>Email</th>
+                  <th>Phone</th>
                   <th>Discount Code</th>
-                  <th>Activity Level</th>
-                  <th>Health Goal</th>
-                  <th>Age Range</th>
                 </>
               )}
               <th>Status</th>
@@ -177,19 +296,20 @@ function OrdersTab({ type }) {
                   <>
                     <td>{o.full_name}</td>
                     <td>{o.email}</td>
-                    <td>{o.phone}</td>
+                    <td>{o.phone || '—'}</td>
+                    <td>{o.city || '—'}</td>
+                    <td>{o.country || '—'}</td>
                     <td>{o.product_interest}</td>
                     <td>{o.color}</td>
                     <td>{o.size}</td>
                   </>
                 ) : (
                   <>
-                    <td>{o.username}</td>
+                    <td>{o.first_name || '—'}</td>
+                    <td>{o.last_name || '—'}</td>
                     <td>{o.email}</td>
+                    <td>{o.phone || '—'}</td>
                     <td><span className="admin-badge admin-badge-teal">{o.discount_code || '—'}</span></td>
-                    <td>{o.activity_level || '—'}</td>
-                    <td>{o.primary_health_goal || '—'}</td>
-                    <td>{o.age_range || '—'}</td>
                   </>
                 )}
                 <td>
