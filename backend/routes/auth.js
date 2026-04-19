@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const db = require('../database');
+const pool = require('../database');
 
 const SALT_ROUNDS = 10;
 
@@ -42,7 +42,6 @@ router.post('/signup', async (req, res) => {
     session_id,
   } = req.body;
 
-  // Required field checks
   if (!first_name || !last_name || !email || !phone || !city || !country) {
     return res.status(400).json({ success: false, error: 'All contact fields are required.' });
   }
@@ -75,7 +74,6 @@ router.post('/signup', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Contact consent is required.' });
   }
 
-  // Step 2 validation
   if (!age_range) {
     return res.status(400).json({ success: false, field: 'age_range', error: 'Please select your age range.' });
   }
@@ -98,47 +96,48 @@ router.post('/signup', async (req, res) => {
     return res.status(400).json({ success: false, field: 'main_concerns', error: 'Please select at least one concern.' });
   }
 
-  // Check for duplicate email
-  const existingEmail = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-  if (existingEmail) {
-    return res.status(409).json({ success: false, field: 'email', error: 'This email is already registered.' });
-  }
-
   try {
+    const existingEmail = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existingEmail.rows.length > 0) {
+      return res.status(409).json({ success: false, field: 'email', error: 'This email is already registered.' });
+    }
+
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const verificationToken = generateToken();
     let discountCode = generateDiscountCode();
 
-    while (db.prepare('SELECT id FROM users WHERE discount_code = ?').get(discountCode)) {
+    let codeCheck = await pool.query('SELECT id FROM users WHERE discount_code = $1', [discountCode]);
+    while (codeCheck.rows.length > 0) {
       discountCode = generateDiscountCode();
+      codeCheck = await pool.query('SELECT id FROM users WHERE discount_code = $1', [discountCode]);
     }
 
     const mainConcernsStr = Array.isArray(main_concerns)
       ? main_concerns.join(',')
       : String(main_concerns);
 
-    // Use email as username to satisfy the NOT NULL UNIQUE constraint on the legacy column
-    db.prepare(
+    await pool.query(
       `INSERT INTO users
         (username, email, password_hash, discount_code, is_verified, verification_token,
          first_name, last_name, phone, city, country, consent_contacted,
          age_range, sex, height_feet, height_inches, weight, weight_unit,
          primary_health_goal, how_heard, activity_level, health_concerns)
-       VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      email, email, passwordHash, discountCode, verificationToken,
-      first_name.trim(), last_name.trim(), phone.trim(), city.trim(), country,
-      consent_contacted ? 1 : 0,
-      age_range, sex,
-      height_feet ? parseInt(height_feet) : null,
-      height_inches ? parseInt(height_inches) : null,
-      weight ? parseFloat(weight) : null,
-      weight_unit || 'lbs',
-      primary_goal, how_heard, activity_level, mainConcernsStr
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
+      [
+        email, email, passwordHash, discountCode, false, verificationToken,
+        first_name.trim(), last_name.trim(), phone.trim(), city.trim(), country,
+        consent_contacted ? true : false,
+        age_range, sex,
+        height_feet ? parseInt(height_feet) : null,
+        height_inches ? parseInt(height_inches) : null,
+        weight ? parseFloat(weight) : null,
+        weight_unit || 'lbs',
+        primary_goal, how_heard, activity_level, mainConcernsStr,
+      ]
     );
 
     if (session_id) {
-      db.prepare('DELETE FROM cart WHERE session_id = ?').run(session_id);
+      await pool.query('DELETE FROM cart WHERE session_id = $1', [session_id]);
     }
 
     console.log(`[Auth] New signup: ${email} | Discount: ${discountCode}`);
@@ -153,7 +152,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// POST /api/auth/login  (uses email)
+// POST /api/auth/login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -161,12 +160,13 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Email and password are required.' });
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-  if (!user) {
-    return res.status(401).json({ success: false, error: 'Invalid email or password.' });
-  }
-
   try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+    }
+
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.status(401).json({ success: false, error: 'Invalid email or password.' });
@@ -202,25 +202,31 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/auth/forgot-password  (email only)
-router.post('/forgot-password', (req, res) => {
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
     return res.status(400).json({ success: false, error: 'Email address is required.' });
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-  if (!user) {
-    return res.status(404).json({ success: false, error: 'No account found with that email address.' });
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'No account found with that email address.' });
+    }
+
+    const resetToken = generateToken();
+    await pool.query('UPDATE users SET reset_token = $1 WHERE id = $2', [resetToken, user.id]);
+
+    console.log(`[Auth] Password reset token for ${email}: ${resetToken}`);
+
+    res.json({ success: true, message: 'Password reset link has been sent to your email.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: 'Server error. Please try again.' });
   }
-
-  const resetToken = generateToken();
-  db.prepare('UPDATE users SET reset_token = ? WHERE id = ?').run(resetToken, user.id);
-
-  console.log(`[Auth] Password reset token for ${email}: ${resetToken}`);
-
-  res.json({ success: true, message: 'Password reset link has been sent to your email.' });
 });
 
 // POST /api/auth/change-password
@@ -231,14 +237,17 @@ router.post('/change-password', async (req, res) => {
     return res.status(400).json({ success: false, error: 'All fields are required.' });
   }
 
-  // Support lookup by either email or username (legacy support)
-  const identifier = email || username;
-  const user = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?').get(identifier, identifier);
-  if (!user) {
-    return res.status(404).json({ success: false, error: 'User not found.' });
-  }
-
   try {
+    const identifier = email || username;
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1 OR username = $1',
+      [identifier]
+    );
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found.' });
+    }
+
     const match = await bcrypt.compare(old_password, user.password_hash);
     if (!match) {
       return res.status(401).json({ success: false, error: 'Old password is incorrect.' });
@@ -257,7 +266,7 @@ router.post('/change-password', async (req, res) => {
     }
 
     const newHash = await bcrypt.hash(new_password, SALT_ROUNDS);
-    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(newHash, user.id);
+    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newHash, user.id]);
 
     console.log(`[Auth] Password changed for: ${user.email}`);
     res.json({ success: true, message: 'Password changed successfully.' });

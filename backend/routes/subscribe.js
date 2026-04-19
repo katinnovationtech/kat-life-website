@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const pool = require('../database');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // POST /api/subscribe
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email || !email.trim()) {
@@ -15,12 +15,15 @@ router.post('/', (req, res) => {
       return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
     }
 
-    const existing = db.prepare('SELECT id FROM email_subscriptions WHERE email = ?').get(email.trim().toLowerCase());
-    if (existing) {
+    const existing = await pool.query(
+      'SELECT id FROM email_subscriptions WHERE email = $1',
+      [email.trim().toLowerCase()]
+    );
+    if (existing.rows.length > 0) {
       return res.status(409).json({ success: false, error: 'This email is already subscribed.' });
     }
 
-    db.prepare('INSERT INTO email_subscriptions (email) VALUES (?)').run(email.trim().toLowerCase());
+    await pool.query('INSERT INTO email_subscriptions (email) VALUES ($1)', [email.trim().toLowerCase()]);
     res.status(201).json({ success: true, message: 'Thank you for subscribing!' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

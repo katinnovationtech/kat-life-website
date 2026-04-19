@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const pool = require('../database');
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const products = db.prepare('SELECT * FROM products').all();
+    const result = await pool.query('SELECT * FROM products');
+    const products = result.rows;
 
     const grouped = {};
     products.forEach(product => {
@@ -24,17 +25,16 @@ router.get('/', (req, res) => {
       });
     });
 
-    const result = Object.values(grouped);
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: Object.values(grouped) });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// GET /api/products/:id  — unchanged, used by product detail page
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+    const result = await pool.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
+    const product = result.rows[0];
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }

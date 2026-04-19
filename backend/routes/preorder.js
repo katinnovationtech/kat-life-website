@@ -1,39 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const pool = require('../database');
 
-// POST /api/preorder-guest
-router.post('/guest', (req, res) => {
+// POST /api/preorder/guest
+router.post('/guest', async (req, res) => {
   const { full_name, email, phone, city, country, product_interest, color, size, session_id } = req.body;
 
-  // Validate required fields
   if (!full_name || !email || !phone || !city || !country || !product_interest || !color || !size) {
     return res.status(400).json({ success: false, error: 'All fields are required.' });
   }
 
-  // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
   }
 
-  // Check for duplicate email
-  const existing = db.prepare('SELECT id FROM guest_preorders WHERE email = ?').get(email);
-  if (existing) {
-    return res.status(409).json({
-      success: false,
-      error: 'This email has already been registered for a pre-order.',
-    });
-  }
-
   try {
-    const stmt = db.prepare(
-      'INSERT INTO guest_preorders (full_name, email, phone, city, country, product_interest, color, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-    );
-    stmt.run(full_name, email, phone, city, country, product_interest, color, size);
-    if (session_id) {
-      db.prepare('DELETE FROM cart WHERE session_id = ?').run(session_id);
+    const existing = await pool.query('SELECT id FROM guest_preorders WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({
+        success: false,
+        error: 'This email has already been registered for a pre-order.',
+      });
     }
+
+    await pool.query(
+      'INSERT INTO guest_preorders (full_name, email, phone, city, country, product_interest, color, size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      [full_name, email, phone, city, country, product_interest, color, size]
+    );
+
+    if (session_id) {
+      await pool.query('DELETE FROM cart WHERE session_id = $1', [session_id]);
+    }
+
     console.log(`[PreOrder] Guest pre-order registered: ${email}`);
     res.json({ success: true, message: 'Pre-order registered successfully.' });
   } catch (err) {
