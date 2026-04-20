@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import API_URL from '../config';
 
 export const CartContext = createContext(null);
 
@@ -11,7 +12,7 @@ export function CartProvider({ children }) {
       setCartCount(0);
       return;
     }
-    fetch(`/api/cart/${sessionId}`)
+    fetch(`${API_URL}/api/cart/${sessionId}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {

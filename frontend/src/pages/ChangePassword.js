@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
+import API_URL from '../config';
 
 function ChangePassword() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ function ChangePassword() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(`${API_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: user.username, ...form }),

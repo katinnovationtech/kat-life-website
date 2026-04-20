@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import API_URL from '../../config';
 
 function AdminProtectedRoute({ children }) {
   const [checking, setChecking] = useState(true);
@@ -11,7 +12,7 @@ function AdminProtectedRoute({ children }) {
       setChecking(false);
       return;
     }
-    fetch('/api/admin/me', {
+    fetch(`${API_URL}/api/admin/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())

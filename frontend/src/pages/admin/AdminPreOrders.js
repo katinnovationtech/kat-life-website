@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import AdminLayout from './AdminLayout';
 import './Admin.css';
+import API_URL from '../../config';
 
 const STATUSES = ['Ordered', 'Processing', 'In Delivery', 'Delivered'];
 const PAGE_SIZE = 10;
@@ -178,7 +179,7 @@ function OrdersTab({ type }) {
   const token = localStorage.getItem('adminToken');
 
   const fetchOrders = useCallback(() => {
-    const url = type === 'guest' ? '/api/admin/preorders/guest' : '/api/admin/preorders/members';
+    const url = type === 'guest' ? `${API_URL}/api/admin/preorders/guest` : `${API_URL}/api/admin/preorders/members`;
     fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => { if (d.success) setOrders(d.preorders || []); })
@@ -188,7 +189,7 @@ function OrdersTab({ type }) {
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const handleStatusChange = async (id, status) => {
-    const url = type === 'guest' ? `/api/admin/preorders/guest/${id}` : `/api/admin/preorders/member/${id}`;
+    const url = type === 'guest' ? `${API_URL}/api/admin/preorders/guest/${id}` : `${API_URL}/api/admin/preorders/member/${id}`;
     await fetch(url, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -202,7 +203,7 @@ function OrdersTab({ type }) {
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(
-        `http://localhost:5000/api/admin/preorders/export?type=${type}`,
+        `${API_URL}/api/admin/preorders/export?type=${type}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!response.ok) throw new Error('Export failed');

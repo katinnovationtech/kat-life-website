@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
 import './Admin.css';
+import API_URL from '../../config';
 
 const STATUS_BADGE = {
   Ordered: 'admin-badge-ordered',
@@ -15,7 +16,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
-    fetch('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => { if (data.success) setStats(data.stats); })
       .finally(() => setLoading(false));

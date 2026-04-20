@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import './Contact.css';
+import API_URL from '../config';
 
 const CHAR_LIMIT = 500;
 
@@ -46,7 +47,7 @@ function Contact() {
 
     setSubmitStatus('loading');
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

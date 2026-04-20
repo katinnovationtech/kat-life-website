@@ -1,11 +1,16 @@
+console.log('PORT:', process.env.PORT);
+console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
+
 const { Pool } = require('pg');
-require('dotenv').config();
+
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:VZorOUrpKZgJGPjLJuCkLHkGZLBYppNX@shortline.proxy.rlwy.net:28176/railway';
+
+console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
+console.log('Using connection:', connectionString.substring(0, 30) + '...');
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production'
-    ? { rejectUnauthorized: false }
-    : false
+  connectionString,
+  ssl: { rejectUnauthorized: false }
 });
 
 module.exports = pool;

@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import './ProductDetail.css';
+import API_URL from '../config';
 
 const COLOR_MAP = {
   'White':      '#f5f5f5',
@@ -73,8 +74,8 @@ function ProductDetail() {
     setLoading(true);
     setError('');
     Promise.all([
-      fetch(`/api/products/${id}`).then(r => r.json()),
-      fetch('/api/products').then(r => r.json()),
+      fetch(`${API_URL}/api/products/${id}`).then(r => r.json()),
+      fetch(`${API_URL}/api/products`).then(r => r.json()),
     ])
       .then(([prodData, allData]) => {
         if (prodData.success) {
@@ -108,7 +109,7 @@ function ProductDetail() {
     }
     setAddStatus('loading');
     try {
-      const res = await fetch('/api/cart', {
+      const res = await fetch(`${API_URL}/api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

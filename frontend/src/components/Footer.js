@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
+import API_URL from '../config';
 
 function Footer() {
   const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ function Footer() {
 
     setSubStatus('loading');
     try {
-      const res = await fetch('/api/subscribe', {
+      const res = await fetch(`${API_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),

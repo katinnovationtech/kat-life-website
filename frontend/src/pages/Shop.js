@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { CartContext } from '../context/CartContext';
 import './Shop.css';
+import API_URL from '../config';
 
 // Exact spec colors
 const COLOR_MAP = {
@@ -78,7 +79,7 @@ function ProductCard({ product }) {
     if (!selectedSize || adding || !currentVariant) return;
     setAdding(true);
     try {
-      const res = await fetch('/api/cart', {
+      const res = await fetch(`${API_URL}/api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -265,7 +266,7 @@ function Shop() {
   const [filterType, setFilterType] = useState('all');
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch(`${API_URL}/api/products`)
       .then((r) => r.json())
       .then((data) => {
         if (data.success) setProducts(data.data);

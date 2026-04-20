@@ -1,4 +1,4 @@
-require('dotenv').config();
+
 
 const express = require('express');
 const cors = require('cors');
@@ -16,7 +16,7 @@ const adminRouter = require('./routes/admin');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 app.use('/api/products', productsRouter);
@@ -175,8 +175,8 @@ async function initDatabase() {
 
 initDatabase()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`KAT Life backend running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`KAT Life backend running on port ${PORT}`);
     });
   })
   .catch((err) => {

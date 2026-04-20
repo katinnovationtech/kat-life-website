@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import './Cart.css';
+import API_URL from '../config';
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -33,7 +34,7 @@ function Cart() {
   const fetchCart = useCallback(() => {
     setLoading(true);
     setError('');
-    fetch(`/api/cart/${sessionId}`)
+    fetch(`${API_URL}/api/cart/${sessionId}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.success) setItems(data.data);
@@ -50,7 +51,7 @@ function Cart() {
   const updateQty = async (itemId, newQty) => {
     if (newQty < 1) return;
     try {
-      const res = await fetch(`/api/cart/${itemId}`, {
+      const res = await fetch(`${API_URL}/api/cart/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQty }),
@@ -67,7 +68,7 @@ function Cart() {
 
   const removeItem = async (itemId) => {
     try {
-      const res = await fetch(`/api/cart/${itemId}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/cart/${itemId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setItems((prev) => prev.filter((i) => i.id !== itemId));

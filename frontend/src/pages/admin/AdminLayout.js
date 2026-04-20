@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import './AdminLayout.css';
+import API_URL from '../../config';
 
 const NAV = [
   { to: '/admin/dashboard', icon: '⊞', label: 'Dashboard' },
@@ -22,7 +23,7 @@ function AdminLayout({ children, title }) {
   const handleLogout = async () => {
     const token = localStorage.getItem('adminToken');
     try {
-      await fetch('/api/admin/logout', {
+      await fetch(`${API_URL}/api/admin/logout`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });

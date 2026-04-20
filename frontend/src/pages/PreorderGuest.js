@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Auth.css';
+import API_URL from '../config';
 
 const PRODUCTS = ['OSTAYA™ Wellness Skorts', 'OSTAYA™ Wellness Shorts', 'Both'];
 const COLORS = ['White', 'Black', 'Grey', 'Royal Blue', 'Navy Blue'];
@@ -87,7 +88,7 @@ function PreorderGuest() {
     setLoading(true);
     try {
       const session_id = localStorage.getItem('cartSessionId');
-      const res = await fetch('/api/preorder/guest', {
+      const res = await fetch(`${API_URL}/api/preorder/guest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, session_id }),

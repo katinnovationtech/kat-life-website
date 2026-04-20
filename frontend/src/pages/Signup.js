@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import './Auth.css';
+import API_URL from '../config';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -254,7 +255,7 @@ function Signup() {
     setGlobalError('');
     try {
       const session_id = localStorage.getItem('cartSessionId');
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

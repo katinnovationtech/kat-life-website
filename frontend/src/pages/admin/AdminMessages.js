@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
 import './Admin.css';
+import API_URL from '../../config';
 
 function AdminMessages() {
   const [messages, setMessages] = useState([]);
@@ -9,7 +10,7 @@ function AdminMessages() {
   const token = localStorage.getItem('adminToken');
 
   useEffect(() => {
-    fetch('/api/admin/contacts', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/api/admin/contacts`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => { if (d.success) setMessages(d.messages); })
       .finally(() => setLoading(false));
@@ -22,7 +23,7 @@ function AdminMessages() {
     }
     setExpanded(msg);
     if (!msg.is_read) {
-      await fetch(`/api/admin/contacts/${msg.id}/read`, {
+      await fetch(`${API_URL}/api/admin/contacts/${msg.id}/read`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
       });

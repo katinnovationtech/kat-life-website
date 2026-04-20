@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import AdminLayout from './AdminLayout';
 import './Admin.css';
+import API_URL from '../../config';
 
 const TYPES = ['skort', 'short'];
 const COLORS = ['White', 'Black', 'Grey', 'Royal Blue', 'Navy Blue'];
@@ -111,7 +112,7 @@ function AdminInventory() {
   const token = localStorage.getItem('adminToken');
 
   const fetchProducts = useCallback(() => {
-    fetch('/api/admin/products', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/api/admin/products`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((d) => { if (d.success) setProducts(d.products); })
       .finally(() => setLoading(false));
@@ -121,18 +122,18 @@ function AdminInventory() {
 
   const handleSave = async (form) => {
     if (form.id) {
-      await fetch(`/api/admin/products/${form.id}`, {
+      await fetch(`${API_URL}/api/admin/products/${form.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),
       });
-      await fetch(`/api/admin/products/${form.id}/availability`, {
+      await fetch(`${API_URL}/api/admin/products/${form.id}/availability`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ is_available: form.is_available }),
       });
     } else {
-      await fetch('/api/admin/products', {
+      await fetch(`${API_URL}/api/admin/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),
@@ -143,7 +144,7 @@ function AdminInventory() {
 
   const handleToggle = async (product) => {
     const newVal = !product.is_available;
-    await fetch(`/api/admin/products/${product.id}/availability`, {
+    await fetch(`${API_URL}/api/admin/products/${product.id}/availability`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ is_available: newVal }),
@@ -152,7 +153,7 @@ function AdminInventory() {
   };
 
   const handleDelete = async () => {
-    await fetch(`/api/admin/products/${deleteId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    await fetch(`${API_URL}/api/admin/products/${deleteId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
     setProducts((prev) => prev.filter((p) => p.id !== deleteId));
     setDeleteId(null);
   };
