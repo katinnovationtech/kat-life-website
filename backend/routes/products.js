@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database');
+const pool = require('../database');
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const products = db.prepare(`
+    const result = await pool.query(`
       SELECT p.*, pt.name as product_type_name, pt.slug as product_type_slug
       FROM products p
       LEFT JOIN product_types pt ON p.product_type_id = pt.id
-      ORDER BY pt.name, p.name, p.color
-    `).all();
+      ORDER BY pt.name NULLS LAST, p.name, p.color
+    `);
+    const products = result.rows;
 
     const grouped = {};
     products.forEach(product => {
@@ -47,15 +48,15 @@ router.get('/', (req, res) => {
   }
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const product = db.prepare(`
+    const result = await pool.query(`
       SELECT p.*, pt.name as product_type_name, pt.slug as product_type_slug
       FROM products p
       LEFT JOIN product_types pt ON p.product_type_id = pt.id
-      WHERE p.id = ?
-    `).get(req.params.id);
-
+      WHERE p.id = $1
+    `, [req.params.id]);
+    const product = result.rows[0];
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }

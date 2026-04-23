@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const db = require('../database');
+const pool = require('../database');
 
 const SALT_ROUNDS = 10;
 
@@ -97,8 +97,8 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
-    const existingEmail = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existingEmail) {
+    const existingEmail = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existingEmail.rows.length > 0) {
       return res.status(409).json({ success: false, field: 'email', error: 'This email is already registered.' });
     }
 
@@ -106,35 +106,38 @@ router.post('/signup', async (req, res) => {
     const verificationToken = generateToken();
     let discountCode = generateDiscountCode();
 
-    while (db.prepare('SELECT id FROM users WHERE discount_code = ?').get(discountCode)) {
+    let codeCheck = await pool.query('SELECT id FROM users WHERE discount_code = $1', [discountCode]);
+    while (codeCheck.rows.length > 0) {
       discountCode = generateDiscountCode();
+      codeCheck = await pool.query('SELECT id FROM users WHERE discount_code = $1', [discountCode]);
     }
 
     const mainConcernsStr = Array.isArray(main_concerns)
       ? main_concerns.join(',')
       : String(main_concerns);
 
-    db.prepare(
+    await pool.query(
       `INSERT INTO users
         (username, email, password_hash, discount_code, is_verified, verification_token,
          first_name, last_name, phone, city, country, consent_contacted,
          age_range, sex, height_feet, height_inches, weight, weight_unit,
          primary_health_goal, how_heard, activity_level, health_concerns)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      email, email, passwordHash, discountCode, 0, verificationToken,
-      first_name.trim(), last_name.trim(), phone.trim(), city.trim(), country,
-      consent_contacted ? 1 : 0,
-      age_range, sex,
-      height_feet ? parseInt(height_feet) : null,
-      height_inches ? parseInt(height_inches) : null,
-      weight ? parseFloat(weight) : null,
-      weight_unit || 'lbs',
-      primary_goal, how_heard, activity_level, mainConcernsStr,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
+      [
+        email, email, passwordHash, discountCode, false, verificationToken,
+        first_name.trim(), last_name.trim(), phone.trim(), city.trim(), country,
+        consent_contacted ? true : false,
+        age_range, sex,
+        height_feet ? parseInt(height_feet) : null,
+        height_inches ? parseInt(height_inches) : null,
+        weight ? parseFloat(weight) : null,
+        weight_unit || 'lbs',
+        primary_goal, how_heard, activity_level, mainConcernsStr,
+      ]
     );
 
     if (session_id) {
-      db.prepare('DELETE FROM cart WHERE session_id = ?').run(session_id);
+      await pool.query('DELETE FROM cart WHERE session_id = $1', [session_id]);
     }
 
     console.log(`[Auth] New signup: ${email} | Discount: ${discountCode}`);
@@ -158,7 +161,8 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
     if (!user) {
       return res.status(401).json({ success: false, error: 'Invalid email or password.' });
     }
@@ -199,7 +203,7 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/auth/forgot-password
-router.post('/forgot-password', (req, res) => {
+router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -207,13 +211,14 @@ router.post('/forgot-password', (req, res) => {
   }
 
   try {
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
     if (!user) {
       return res.status(404).json({ success: false, error: 'No account found with that email address.' });
     }
 
     const resetToken = generateToken();
-    db.prepare('UPDATE users SET reset_token = ? WHERE id = ?').run(resetToken, user.id);
+    await pool.query('UPDATE users SET reset_token = $1 WHERE id = $2', [resetToken, user.id]);
 
     console.log(`[Auth] Password reset token for ${email}: ${resetToken}`);
 
@@ -234,7 +239,11 @@ router.post('/change-password', async (req, res) => {
 
   try {
     const identifier = email || username;
-    const user = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?').get(identifier, identifier);
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1 OR username = $1',
+      [identifier]
+    );
+    const user = result.rows[0];
     if (!user) {
       return res.status(404).json({ success: false, error: 'User not found.' });
     }
@@ -257,7 +266,7 @@ router.post('/change-password', async (req, res) => {
     }
 
     const newHash = await bcrypt.hash(new_password, SALT_ROUNDS);
-    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(newHash, user.id);
+    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newHash, user.id]);
 
     console.log(`[Auth] Password changed for: ${user.email}`);
     res.json({ success: true, message: 'Password changed successfully.' });
