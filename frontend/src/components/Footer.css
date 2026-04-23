@@ -175,6 +175,7 @@
   }
 }
 
+
 @media (max-width: 600px) {
   .footer__top {
     grid-template-columns: 1fr;
