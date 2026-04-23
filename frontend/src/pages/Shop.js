@@ -6,7 +6,6 @@ import { CartContext } from '../context/CartContext';
 import './Shop.css';
 import API_URL from '../config';
 
-// Exact spec colors
 const COLOR_MAP = {
   'White':      '#FFFFFF',
   'Black':      '#000000',
@@ -45,7 +44,7 @@ function ProductCard({ product }) {
 
   const variants = product.variants || [];
   const [variantIdx, setVariantIdx] = useState(0);
-  const [imgKey, setImgKey] = useState(0);          // incremented to trigger fade
+  const [imgKey, setImgKey] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [adding, setAdding] = useState(false);
   const [addedMsg, setAddedMsg] = useState('');
@@ -118,12 +117,10 @@ function ProductCard({ product }) {
 
   return (
     <div className="product-card">
-      {/* ── Image area ── */}
       <div
         className="product-card__img-wrap"
         onTouchStart={() => setOverlayOpen((o) => !o)}
       >
-        {/* Main image — click navigates to PDP */}
         <div
           className="product-card__img-link"
           onClick={handleCardClick}
@@ -141,7 +138,6 @@ function ProductCard({ product }) {
           />
         </div>
 
-        {/* Left / Right arrows (desktop hover) */}
         {variants.length > 1 && (
           <>
             <button
@@ -161,7 +157,6 @@ function ProductCard({ product }) {
           </>
         )}
 
-        {/* Quick Add overlay */}
         <div className={`product-card__overlay${overlayOpen ? ' overlay--open' : ''}`}>
           {addedMsg ? (
             <div className="product-card__added-msg">{addedMsg}</div>
@@ -211,9 +206,7 @@ function ProductCard({ product }) {
         </div>
       </div>
 
-      {/* ── Info area ── */}
       <div className="product-card__info">
-        {/* Color swatches — always visible, interactive */}
         <div className="product-card__swatches">
           {variants.map((v, i) => (
             <button
@@ -230,10 +223,8 @@ function ProductCard({ product }) {
           ))}
         </div>
 
-        {/* Hover hint — desktop only */}
         <p className="product-card__color-hint">← Hover to explore colors →</p>
 
-        {/* Name / color label / price — clicking goes to PDP */}
         <div
           className="product-card__text-link"
           onClick={handleCardClick}
@@ -259,6 +250,7 @@ function ProductCard({ product }) {
 
 function Shop() {
   const [products, setProducts] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sortBy, setSortBy] = useState('default');
@@ -266,23 +258,27 @@ function Shop() {
   const [filterType, setFilterType] = useState('all');
 
   useEffect(() => {
-    fetch(`${API_URL}/api/products`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) setProducts(data.data);
+    Promise.all([
+      fetch(`${API_URL}/api/products`).then((r) => r.json()),
+      fetch(`${API_URL}/api/product-types`).then((r) => r.json()),
+    ])
+      .then(([prodData, typeData]) => {
+        if (prodData.success) setProducts(prodData.data);
         else setError('Failed to load products.');
+        if (typeData.success) setProductTypes(typeData.data);
       })
       .catch(() => setError('Network error. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = products.filter(
-    (p) => filterType === 'all' || p.type === filterType
-  );
+  const filtered = products.filter((p) => {
+    if (filterType === 'all') return true;
+    return p.product_type_slug === filterType || p.product_type_id === filterType;
+  });
 
   const sorted = [...filtered].sort((a, b) => {
-    const priceA = a.variants?.[0]?.price ?? a.price ?? 0;
-    const priceB = b.variants?.[0]?.price ?? b.price ?? 0;
+    const priceA = a.variants?.[0]?.price ?? 0;
+    const priceB = b.variants?.[0]?.price ?? 0;
     switch (sortBy) {
       case 'name-asc':   return a.name.localeCompare(b.name);
       case 'name-desc':  return b.name.localeCompare(a.name);
@@ -330,13 +326,19 @@ function Shop() {
 
             {filterOpen && (
               <div className="shop-filter-dropdown">
-                {[['all', 'All Products'], ['skort', 'Wellness Skorts'], ['short', 'Wellness Shorts']].map(([val, label]) => (
+                <button
+                  className={`shop-filter-option${filterType === 'all' ? ' active' : ''}`}
+                  onClick={() => { setFilterType('all'); setFilterOpen(false); }}
+                >
+                  All Products
+                </button>
+                {productTypes.map((t) => (
                   <button
-                    key={val}
-                    className={`shop-filter-option${filterType === val ? ' active' : ''}`}
-                    onClick={() => { setFilterType(val); setFilterOpen(false); }}
+                    key={t.id}
+                    className={`shop-filter-option${filterType === t.slug ? ' active' : ''}`}
+                    onClick={() => { setFilterType(t.slug); setFilterOpen(false); }}
                   >
-                    {label}
+                    {t.name}
                   </button>
                 ))}
               </div>
@@ -364,7 +366,6 @@ function Shop() {
       <main className="shop-products">
         <div className="shop-products__inner">
 
-          {/* Desktop hint — hidden on mobile */}
           {!loading && !error && sorted.length > 0 && (
             <p className="shop-desktop-hint">
               💡 Hover over a product to explore available colors

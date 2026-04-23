@@ -1,16 +1,7 @@
-console.log('PORT:', process.env.PORT);
-console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
+const Database = require('better-sqlite3');
+const path = require('path');
 
-const { Pool } = require('pg');
+const db = new Database(path.join(__dirname, 'kat_life.db'));
+db.pragma('journal_mode = WAL');
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:VZorOUrpKZgJGPjLJuCkLHkGZLBYppNX@shortline.proxy.rlwy.net:28176/railway';
-
-console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
-console.log('Using connection:', connectionString.substring(0, 30) + '...');
-
-const pool = new Pool({
-  connectionString,
-  ssl: { rejectUnauthorized: false }
-});
-
-module.exports = pool;
+module.exports = db;

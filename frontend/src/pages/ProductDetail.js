@@ -91,6 +91,8 @@ function ProductDetail() {
               ...v,
               name: group.name,
               type: group.type,
+              product_type_id: v.product_type_id ?? group.product_type_id,
+              product_type_name: group.product_type_name,
               description: group.description,
             }))
           );
@@ -136,7 +138,12 @@ function ProductDetail() {
     setTimeout(() => { setAddStatus(null); setAddMessage(''); }, 3000);
   };
 
-  const similar = allProducts.filter(p => p.id !== parseInt(id)).slice(0, 6);
+  const similar = allProducts.filter(p =>
+    p.id !== parseInt(id) &&
+    product &&
+    p.product_type_id != null &&
+    p.product_type_id === product.product_type_id
+  ).slice(0, 6);
 
   const scrollSimilar = (dir) => {
     if (similarRef.current) {
@@ -232,7 +239,7 @@ function ProductDetail() {
 
         {/* Right: Product info */}
         <div className="pdp-info">
-          <p className="pdp-info__type">{product.type === 'skort' ? 'Wellness Skort' : 'Wellness Short'}</p>
+          <p className="pdp-info__type">{product.product_type_name || product.type}</p>
           <h1 className="pdp-info__name">{product.name}</h1>
           <p className="pdp-info__color-label">Color: <strong>{selectedColor}</strong></p>
           <p className="pdp-info__price">

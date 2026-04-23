@@ -6,6 +6,7 @@ import API_URL from '../../config';
 const NAV = [
   { to: '/admin/dashboard', icon: '⊞', label: 'Dashboard' },
   { to: '/admin/preorders', icon: '🛍', label: 'Pre-Orders' },
+  { to: '/admin/product-types', icon: '🏷', label: 'Product Types' },
   { to: '/admin/inventory', icon: '📦', label: 'Inventory' },
   { to: '/admin/users', icon: '👥', label: 'Users' },
   { to: '/admin/newsletter', icon: '✉', label: 'Newsletter' },

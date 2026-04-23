@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../database');
+const db = require('../database');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // POST /api/contact
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   try {
     const { full_name, contact, email, message } = req.body;
 
@@ -28,10 +28,9 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Message must not exceed 500 characters.' });
     }
 
-    await pool.query(
-      'INSERT INTO contact_messages (full_name, contact, email, message) VALUES ($1, $2, $3, $4)',
-      [full_name.trim(), contact.trim(), email.trim().toLowerCase(), message.trim()]
-    );
+    db.prepare(
+      'INSERT INTO contact_messages (full_name, contact, email, message) VALUES (?, ?, ?, ?)'
+    ).run(full_name.trim(), contact.trim(), email.trim().toLowerCase(), message.trim());
 
     res.status(201).json({ success: true, message: "Your message has been sent. We'll be in touch soon!" });
   } catch (err) {

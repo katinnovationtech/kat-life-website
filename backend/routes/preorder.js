@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../database');
+const db = require('../database');
 
 // POST /api/preorder/guest
-router.post('/guest', async (req, res) => {
+router.post('/guest', (req, res) => {
   const { full_name, email, phone, city, country, product_interest, color, size, session_id } = req.body;
 
   if (!full_name || !email || !phone || !city || !country || !product_interest || !color || !size) {
@@ -16,21 +16,20 @@ router.post('/guest', async (req, res) => {
   }
 
   try {
-    const existing = await pool.query('SELECT id FROM guest_preorders WHERE email = $1', [email]);
-    if (existing.rows.length > 0) {
+    const existing = db.prepare('SELECT id FROM guest_preorders WHERE email = ?').get(email);
+    if (existing) {
       return res.status(409).json({
         success: false,
         error: 'This email has already been registered for a pre-order.',
       });
     }
 
-    await pool.query(
-      'INSERT INTO guest_preorders (full_name, email, phone, city, country, product_interest, color, size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-      [full_name, email, phone, city, country, product_interest, color, size]
-    );
+    db.prepare(
+      'INSERT INTO guest_preorders (full_name, email, phone, city, country, product_interest, color, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(full_name, email, phone, city, country, product_interest, color, size);
 
     if (session_id) {
-      await pool.query('DELETE FROM cart WHERE session_id = $1', [session_id]);
+      db.prepare('DELETE FROM cart WHERE session_id = ?').run(session_id);
     }
 
     console.log(`[PreOrder] Guest pre-order registered: ${email}`);

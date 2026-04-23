@@ -22,6 +22,7 @@ import AdminInventory from './pages/admin/AdminInventory';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminNewsletter from './pages/admin/AdminNewsletter';
 import AdminMessages from './pages/admin/AdminMessages';
+import AdminProductTypes from './pages/admin/AdminProductTypes';
 import AdminProtectedRoute from './pages/admin/AdminProtectedRoute';
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
         <Route path="/admin/preorders" element={<AdminProtectedRoute><AdminPreOrders /></AdminProtectedRoute>} />
+        <Route path="/admin/product-types" element={<AdminProtectedRoute><AdminProductTypes /></AdminProtectedRoute>} />
         <Route path="/admin/inventory" element={<AdminProtectedRoute><AdminInventory /></AdminProtectedRoute>} />
         <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
         <Route path="/admin/newsletter" element={<AdminProtectedRoute><AdminNewsletter /></AdminProtectedRoute>} />
