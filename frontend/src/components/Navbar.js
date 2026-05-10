@@ -42,7 +42,7 @@ function Navbar() {
           {/* Logo */}
           {/* Logo */}
           <Link to="/shop" className="navbar__logo">
-            <img src="frontend/public/images/KatLifeLogo.png" alt="KAT LIFE Logo" />
+            <img src="/images/KatLifeLogo.png" alt="KAT LIFE Logo" />
           </Link>
 
           {/* Center nav links */}
