@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { CartContext } from '../context/CartContext';
-import './shop.css';
+import './shop2.css';
 import API_URL from '../config';
 
 const COLOR_MAP = {
