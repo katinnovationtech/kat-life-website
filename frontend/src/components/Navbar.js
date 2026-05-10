@@ -40,9 +40,9 @@ function Navbar() {
       <nav className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}>
         <div className="navbar__inner">
           {/* Logo */}
+          {/* Logo */}
           <Link to="/shop" className="navbar__logo">
-            <span className="navbar__logo-kat">KAT</span>
-            <span className="navbar__logo-life"> Life</span>
+            <img src="/kat-life-website/frontend/public/images/KatLifeLogo.png" alt="KAT LIFE Logo" />
           </Link>
 
           {/* Center nav links */}
