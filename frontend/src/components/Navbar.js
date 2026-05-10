@@ -42,7 +42,7 @@ function Navbar() {
           {/* Logo */}
           {/* Logo */}
           <Link to="/shop" className="navbar__logo">
-            <img src="/frontend/public/images/KatLifeLogo.png" alt="KAT LIFE Logo" />
+            <img src="frontend/public/images/KatLifeLogo.png" alt="KAT LIFE Logo" />
           </Link>
 
           {/* Center nav links */}
@@ -99,7 +99,7 @@ function Navbar() {
           <Link to="/about" className="mobile-menu__link">About</Link>
           <Link to="/shop" className="mobile-menu__link">Shop</Link>
           <Link to="/contact" className="mobile-menu__link">Contact</Link>
-          <Link to="/cart" className="mobile-menu__link">
+          <Link to="/cart" className="mobile-menu__link">fo
             Bag{cartCount > 0 ? ` (${cartCount})` : ''}
           </Link>
           <Link to="/login" className="mobile-menu__link">Sign In</Link>
