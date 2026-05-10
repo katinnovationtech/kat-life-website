@@ -1,0 +1,378 @@
+/* =========================
+   SHOP PAGE
+========================= */
+
+.shop-page {
+  min-height: 100vh;
+  background-color: #f9fcff;
+  font-family: "Poppins", sans-serif;
+  color: #213b52;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.shop-hero {
+  background-color: #e8f6ff;
+  padding: 140px 45px 80px;
+  margin-top: 90px;
+  text-align: center;
+}
+
+.shop-hero__content {
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+.shop-hero__eyebrow {
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #789b9b;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.shop-hero__heading {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(38px, 5vw, 58px);
+  font-weight: 400;
+  color: #213b52;
+  margin-bottom: 20px;
+}
+
+.shop-hero__tagline {
+  font-size: 18px;
+  color: #789b9b;
+  font-style: italic;
+  margin-bottom: 18px;
+}
+
+.shop-hero__desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #213b52;
+  max-width: 620px;
+  margin: 0 auto 34px;
+}
+
+.shop-hero__btn {
+  display: inline-block;
+  background-color: #789b9b;
+  color: #f3f3ef;
+  padding: 12px 28px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.shop-hero__btn:hover {
+  background-color: #5f8080;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   FILTER BAR
+========================= */
+
+.shop-filter-bar {
+  background-color: #fff;
+  border-bottom: 2px solid #789b9b;
+  position: sticky;
+  top: 90px;
+  z-index: 50;
+}
+
+.shop-filter-bar__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 45px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.shop-filter-left,
+.shop-filter-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.shop-filter-btn,
+.shop-sort-select {
+  border: 1px solid #789b9b;
+  background-color: #fff;
+  color: #213b52;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.shop-filter-btn:hover,
+.shop-sort-select:hover {
+  background-color: #e8f6ff;
+}
+
+.shop-filter-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background-color: #fff;
+  border: 1px solid #789b9b;
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 180px;
+  z-index: 100;
+}
+
+.shop-filter-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: #fff;
+  border: none;
+  color: #213b52;
+  cursor: pointer;
+}
+
+.shop-filter-option:hover,
+.shop-filter-option.active {
+  background-color: #e8f6ff;
+}
+
+.shop-filter-count,
+.shop-sort-label {
+  color: #789b9b;
+  font-size: 14px;
+}
+
+/* =========================
+   PRODUCTS SECTION
+========================= */
+
+.shop-products {
+  padding: 70px 45px;
+}
+
+.shop-products__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================
+   PRODUCT GRID
+========================= */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 50px;
+}
+
+/* =========================
+   PRODUCT CARD
+========================= */
+
+.product-card {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #dce7ec;
+  transition: transform 0.3s ease;
+  text-align: center;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+.product-card__img-wrap {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background-color: #f3f3ef;
+}
+
+.product-card__img-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.product-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.product-card:hover .product-card__img {
+  transform: scale(1.03);
+}
+
+/* =========================
+   REMOVE SHOPIFY STYLE UI
+========================= */
+
+.product-card__overlay,
+.product-card__arrow,
+.product-card__quick-add,
+.product-card__quick-add-label,
+.product-card__selector-label,
+.product-card__sizes,
+.product-card__add-btn,
+.product-card__added-msg {
+  display: none;
+}
+
+/* =========================
+   PRODUCT INFO
+========================= */
+
+.product-card__info {
+  padding: 24px 20px 30px;
+}
+
+.product-card__swatches {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.product-card__swatch-btn {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+}
+
+.product-card__swatch-btn.active {
+  outline: 2px solid #789b9b;
+}
+
+.product-card__color-hint {
+  display: none;
+}
+
+.product-card__name {
+  font-size: 22px;
+  font-weight: 500;
+  color: #213b52;
+  margin-bottom: 8px;
+}
+
+.product-card__color {
+  font-size: 15px;
+  color: #789b9b;
+  margin-bottom: 10px;
+}
+
+.product-card__price {
+  font-size: 18px;
+  color: #789b9b;
+  font-weight: 600;
+}
+
+/* =========================
+   LOADING
+========================= */
+
+.shop-loading {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 50px;
+}
+
+.product-card-skeleton {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #dce7ec;
+}
+
+.skeleton-img {
+  aspect-ratio: 3/4;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin: 16px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-line--short {
+  width: 50%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shop-error {
+  text-align: center;
+  color: #d9534f;
+  font-size: 18px;
+  padding: 60px 20px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media screen and (max-width: 768px) {
+  .shop-hero {
+    padding: 120px 20px 70px;
+  }
+
+  .shop-products {
+    padding: 50px 20px;
+  }
+
+  .product-grid,
+  .shop-loading {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .shop-filter-bar__inner {
+    padding: 14px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .shop-hero__heading {
+    font-size: 42px;
+  }
+}
