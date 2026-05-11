@@ -99,8 +99,8 @@ function Navbar() {
           <Link to="/about" className="mobile-menu__link">About</Link>
           <Link to="/shop" className="mobile-menu__link">Shop</Link>
           <Link to="/contact" className="mobile-menu__link">Contact</Link>
-          <Link to="/cart" className="mobile-menu__link">fo
-            Bag{cartCount > 0 ? ` (${cartCount})` : ''}
+          <Link to="/cart" className="mobile-menu__link">
+            Cart{cartCount > 0 ? ` (${cartCount})` : ''}
           </Link>
           <Link to="/login" className="mobile-menu__link">Sign In</Link>
         </nav>
