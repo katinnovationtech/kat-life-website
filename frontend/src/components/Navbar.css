@@ -4,7 +4,7 @@
 ========================= */
 
 .navbar {
-font-family: "Playfair Display", serif;
+  font-family: "Playfair Display", serif;
   position: fixed;
   top: 0;
   left: 0;
@@ -72,7 +72,7 @@ font-family: "Playfair Display", serif;
 }
 
 .navbar__links a {
-  font-family: "Poppins", sans-serif;
+  font-family: "Playfair Display", sans-serif;
   font-size: 18px;
   font-weight: 400;
   color: #213b52;
